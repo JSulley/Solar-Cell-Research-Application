@@ -893,7 +893,7 @@ server <- function(input, output) {
     })
     
     
-    ###DATA TABLES###
+    ###DATATABLES###
     
     #Table 1 Output
     output$table <- renderTable({
