@@ -7,6 +7,7 @@ library(readr)
 library(shinydashboard)
 library(data.table)
 library(dplyr)
+library(SplinesUtils)
 source("R scripts/Absolute Max Function 2.0.R")
 source("R scripts/Absolute Max Function.R")
 
@@ -68,12 +69,13 @@ body <- dashboardBody(
         #Content for "Welcome" tab
         tabItem(tabName = "introduction",
                 
+                fluidPage(
                 #Greet the user
                 h1("Welcome!"),
                 h2("Click on the any of the tabs for information you need to know!"),
                 
                 #Organize information
-                tabBox(
+                tabBox(width = 9,
                 
                 #Notes for uploading the file
                 tabPanel("File Format for Upload",
@@ -116,7 +118,18 @@ body <- dashboardBody(
                 p("Where is the row number? To view it, click on the tile of interest. Then the first number to the left is it."),
                 p("Here is an example:"),
                 img(src = "Example Row Number.png", height = 200, width = 350),
-                p("The row number is 1, which would then be inputted in the box labeled 'Smooth Spline Interpolation Display Input'. Now, press 'Go!' and click on the 'Export AllSpectra' tab to see the graph!"))
+                p("The row number is 1, which would then be inputted in the box labeled 'Smooth Spline Interpolation Display Input'. Now, press 'Go!' and click on the 'Export AllSpectra' tab to see the graph!"),
+                hr(),
+                
+                #Interactive Smooth Spline
+                h3("Interactive Smoothing Spline"),
+                p("The smoothing spline plot is now interactive! You can click and drag over a portion of the plot, and the program will display what is inside the region with the window margins specified."),
+                p("In other words, you can zoom into the plot with the result presented underneath it."),
+                p("Additionally, the region specified can be moved around by clicking and holding the specified region and placing it over a different area."),
+                p("The local extrema for the smoothing spline plot are now displayed. When the selected region covers any of these points, the program displays their values."),
+                p("Here is an example:"),
+                img(src = "Screenshot.PNG", height = 520, width = 870)
+                ))
         )
         ),
         
@@ -239,7 +252,11 @@ body <- dashboardBody(
                 downloadButton("downloadSpectrum", "Download Spectrum Plot"),
                 
                 #Output smoothing spline plot
-                plotOutput("smoothLine")
+                plotOutput("smoothLine", brush = brushOpts("smoothPlot_brush",resetOnNew = TRUE)),
+                
+                ########Output smoothing spline plot
+                plotOutput("zoomsmooth"),
+                verbatimTextOutput("info7")
                 
                 ),
         
@@ -270,13 +287,19 @@ server <- function(input, output) {
     options(shiny.maxRequestSize = 30*1024^2)
     
     
+    ######Window margins for zoomsmooth plot
+    window_margins <- reactiveValues(x = NULL, y = NULL)
+    
+    
     ###PREPARATION###
     
     #Read uploaded file
-    first_df <- reactive({
+    first_df <- eventReactive(input$file, {
         
-        #Read CSV file
-        read_csv(input$file$datapath, col_names = FALSE)
+        #Test for a text file
+        if (grepl("\\.txt", input$file$datapath)) {read_tsv(input$file$datapath, col_names = FALSE)}
+        else {read_csv(input$file$datapath, col_names = FALSE)}
+        
         
     })
     
@@ -478,10 +501,44 @@ server <- function(input, output) {
         splinesmoothfit <- smooth.spline(x = wavelengths(), y = y_values())
         
         #Plot smooth spline line on graph
-        plot(wavelengths(), y_values(), xlab = "Wavelengths", ylab = "Normal Intensity", main = paste("Normal Intensity vs. Wavelength \n X =", coordinates()[1],", Y = ", coordinates()[2]))
-        lines(splinesmoothfit, col = "red", lwd = 2)
-        legend("topright", "Smoothing Spline Line", lwd = 2, col = "red")
+        plot(wavelengths(), y_values(), xlab = "Wavelength", ylab = "Normal Intensity", main = paste("Normal Intensity vs. Wavelength \n X =", coordinates()[1],", Y = ", coordinates()[2]))
         
+        newsplinesmooth <- SmoothSplineAsPiecePoly(splinesmoothfit)
+        xs <- solve(newsplinesmooth, deriv = 1)
+        ys <- predict(newsplinesmooth, xs)
+        
+        lines(splinesmoothfit, col = "red", lwd = 2)
+        points(xs, ys, pch = 20, col = "blue", cex = 3)
+        legend("topright", c("Smoothing Spline","Local Extrema"),  lwd = c(2,NA), col = c("red", "blue"), pch = c(NA, 20), pt.cex = c(NA,3))
+        
+    })
+    
+    output$zoomsmooth <- renderPlot({
+        #Create smooth spline function
+        splinesmoothfit <- smooth.spline(x = wavelengths(), y = y_values())
+        
+        #Plot smooth spline line on graph
+        plot(wavelengths(), y_values(), xlab = "Wavelength", ylab = "Normal Intensity", xlim = window_margins$x, ylim = window_margins$y)
+        
+        newsplinesmooth <- SmoothSplineAsPiecePoly(splinesmoothfit)
+        xs <- solve(newsplinesmooth, deriv = 1)
+        ys <- predict(newsplinesmooth, xs)
+        
+        lines(splinesmoothfit, col = "red", lwd = 2)
+        points(xs, ys, pch = 20, col = "blue", cex = 3)
+        legend("topright", c("Smoothing Spline","Local Extrema"),  lwd = c(2,NA), col = c("red", "blue"), pch = c(NA, 20), pt.cex = c(NA,3))
+    })
+    
+    observe({
+        brush <- input$smoothPlot_brush
+        
+        if(!is.null(brush)) {
+            window_margins$x <- c(brush$xmin, brush$xmax)
+            window_margins$y <- c(brush$ymin, brush$ymax)
+        } else {
+            window_margins$x <- NULL
+            window_margins$y <- NULL
+        }
     })
     
     
@@ -772,9 +829,15 @@ server <- function(input, output) {
             svg(file)
             
             #Plot smooth spline line on graph
-            plot(wavelengths(), y_values(), xlab = "Wavelengths", ylab = "Normal Intensity", main = paste("Normal Intensity vs. Wavelength \n X =", coordinates()[1],", Y = ", coordinates()[2]))
+            plot(wavelengths(), y_values(), xlab = "Wavelength", ylab = "Normal Intensity", main = paste("Normal Intensity vs. Wavelength \n X =", coordinates()[1],", Y = ", coordinates()[2]))
+            
+            newsplinesmooth <- SmoothSplineAsPiecePoly(splinesmoothfit)
+            xs <- solve(newsplinesmooth, deriv = 1)
+            ys <- predict(newsplinesmooth, xs)
+            
             lines(splinesmoothfit, col = "red", lwd = 2)
-            legend("topright", "Smoothing Spline Line", lwd = 2, col = "red")
+            points(xs, ys, pch = 20, col = "blue", cex = 3)
+            legend("topright", c("Smoothing Spline","Local Extrema"),  lwd = c(2,NA), col = c("red", "blue"), pch = c(NA, 20), pt.cex = c(NA,3))
             
             dev.off()    
         }
@@ -892,8 +955,23 @@ server <- function(input, output) {
         
     })
     
+    ######Output information for smoothing spline: local max and mins through brush
+    output$info7 <- renderPrint({
+        
+        #Create smooth spline function
+        splinesmoothfit <- smooth.spline(x = wavelengths(), y = y_values())
+        
+        #Determine x ad y values of local max/min
+        newsplinesmooth <- SmoothSplineAsPiecePoly(splinesmoothfit)
+        invisible(capture.output(Wavelength <- solve(newsplinesmooth, deriv = 1)))
+        Normal_Intensity <- predict(newsplinesmooth, Wavelength)
+        
+        #Print local max/min points
+        brushedPoints(data.frame(Wavelength, Normal_Intensity), input$smoothPlot_brush, xvar = "Wavelength", yvar = "Normal_Intensity")
+    })
     
-    ###DATATABLES###
+    
+    ###DATA TABLES###
     
     #Table 1 Output
     output$table <- renderTable({
