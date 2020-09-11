@@ -47,13 +47,11 @@ abs_max_func <- function(x) {
     
   }
   #Bind all the rows of the list together and make the object a data frame
-  wavelength_df <- rbindlist(wavelength_list)
-  wavelength_df <- as.data.frame(wavelength_df)
+  wavelength_df <- as.data.frame(rbindlist(wavelength_list))
   
   #Add normalized column by finding the max intensity and dividing 
   #every number in the "intensity" column by the max intensity.
-  max_intensity_value = max(wavelength_df[,4])
-  normalized_int = wavelength_df[,4]/max_intensity_value
+  normalized_int <- wavelength_df[,4]/max(wavelength_df[,4])
   
   #Combine data frame with the normalized intensity vector
   wavelength_df <- cbind(wavelength_df, normalized_int)
