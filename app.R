@@ -69,12 +69,13 @@ body <- dashboardBody(
         #Content for "Welcome" tab
         tabItem(tabName = "introduction",
                 
+                fluidPage(
                 #Greet the user
                 h1("Welcome!"),
                 h2("Click on the any of the tabs for information you need to know!"),
                 
                 #Organize information
-                tabBox(
+                tabBox(width = 9,
                     
                     #Notes for uploading the file
                     tabPanel("File Format for Upload",
@@ -117,7 +118,19 @@ body <- dashboardBody(
                              p("Where is the row number? To view it, click on the tile of interest. Then the first number to the left is it."),
                              p("Here is an example:"),
                              img(src = "Example Row Number.png", height = 200, width = 350),
-                             p("The row number is 1, which would then be inputted in the box labeled 'Smooth Spline Interpolation Display Input'. Now, press 'Go!' and click on the 'Export AllSpectra' tab to see the graph!"))
+                             p("The row number is 1, which would then be inputted in the box labeled 'Smooth Spline Interpolation Display Input'. Now, press 'Go!' and click on the 'Export AllSpectra' tab to see the graph!")),
+                             hr(),
+                    
+                             #Interactive Smooth Spline
+                             h3("Interactive Smoothing Spline"),
+                             p("The smoothing spline plot is now interactive! You can click and drag over a portion of the plot, and the program will display what is inside the region with the window margins specified."),
+                             p("In other words, you can zoom into the plot with the result presented underneath it."),
+                             p("Additionally, the region specified can be moved around by clicking and holding the specified region and placing it over a different area."),
+                             p("The local extrema for the smoothing spline plot are now displayed. When the selected region covers any of these points, the program displays their values."),
+                             p("Here is an example:"),
+                             img(src = "Screenshot.PNG", height = 520, width = 870)
+                )   
+                            
                 )
         ),
         
@@ -146,6 +159,7 @@ body <- dashboardBody(
                 
                 #Make fluid row for interactive relative intensity map 
                 fluidRow(
+                    
                     h3(strong(em("Note:")), "Did you change the inputs for one or both wavelengths, but the plot(s) look(s) the same/did not change?
                    Make sure you pressed Go! after updating any wavelength values!", align = "center"),
                     
@@ -182,8 +196,8 @@ body <- dashboardBody(
                                #Heat map plot for intensities of wavelength 1
                                plotOutput("Wave2IntenHeatMap", click = "click3"),
                                verbatimTextOutput("info5"))
-                    )),
-                
+                    ),
+                )
         ),
         
         #Content for "Dataset Tables" tab
@@ -242,7 +256,7 @@ body <- dashboardBody(
                 #Output smoothing spline plot
                 plotOutput("smoothLine", brush = brushOpts("smoothPlot_brush",resetOnNew = TRUE)),
                 
-                ########Output smoothing spline plot
+                #Output zoomed smoothing spline plot
                 plotOutput("zoomsmooth"),
                 verbatimTextOutput("info7")
                 
@@ -284,7 +298,6 @@ server <- function(input, output) {
         if (grepl("\\.txt", input$file$datapath)) {read_tsv(input$file$datapath, col_names = FALSE)}
         else {read_csv(input$file$datapath, col_names = FALSE)}
         
-        
     })
     
     #Use abs_max_func (Absolute Max Function.R) for dataset
@@ -325,6 +338,7 @@ server <- function(input, output) {
         
         #Normalize them by dividing by the largest intensity value
         regular_y_val/max(regular_y_val)
+        
     })
     
     #Create smooth spline function
@@ -352,7 +366,8 @@ server <- function(input, output) {
         #Lowest number is 1; highest number is how many coordinates there are in the uploaded dataset
         #Default value is 2
         sliderInput("inslider", "Number of Bins:", min = 1, max = length(dataset()[,3]), value = 2)
-    })
+    
+        })
     
     
     ###HEAT MAP PLOTS###
@@ -919,6 +934,7 @@ server <- function(input, output) {
         z <- reactive({
             hist(dataset()[,3], breaks = bins, main = "Histogram of Peak Wavelengths", xlab = "Peak Wavelengths", col = "blue", border = "white")
         })
+        
         #Transform dataset() into dataset_2
         dataset_2 <- reactive({
             test <- dataset()
@@ -944,8 +960,8 @@ server <- function(input, output) {
     output$info7 <- renderPrint({
         
         #Determine x ad y values of local max/min
-        newsplinesmooth <- SmoothSplineAsPiecePoly(splinesmoothfit)
-        Wavelength <- solve(newsplinesmooth, deriv = 1)
+        newsplinesmooth <- SmoothSplineAsPiecePoly(splinesmoothfit())
+        invisible(capture.output(Wavelength <- solve(newsplinesmooth, deriv = 1)))
         Normal_Intensity <- predict(newsplinesmooth, Wavelength)
         
         #Print local max/min points
