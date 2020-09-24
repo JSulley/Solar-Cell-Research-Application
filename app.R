@@ -8,8 +8,8 @@ library(shinydashboard)
 library(data.table)
 library(dplyr)
 library(SplinesUtils)
-source("R scripts/Absolute Max Function 2.0.R")
 source("R scripts/Absolute Max Function.R")
+source("R scripts/Absolute Max Function 2.0.R")
 
 #Set up shiny dashboard
 #Create header
@@ -300,10 +300,9 @@ server <- function(input, output) {
         if (grepl("\\.txt", input$file$datapath)) {read_tsv(input$file$datapath, col_names = FALSE)}
         else {read_csv(input$file$datapath, col_names = FALSE)}
         
-        
     })
     
-    #Use abs_max_func (Absolute Max Function.R) for dataset
+    #Use abs_max_func (Absolute Max Function.R) for data frame
     dataset <- eventReactive(input$file$datapath,{
 
         #Compute dataframe
