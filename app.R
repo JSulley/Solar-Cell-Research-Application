@@ -8,8 +8,10 @@ library(shinydashboard)
 library(data.table)
 library(dplyr)
 library(SplinesUtils)
+library(shinycssloaders)
 source("R scripts/Absolute Max Function.R")
 source("R scripts/Absolute Max Function 2.0.R")
+source("R scripts/Local Max Function.R")
 
 #Set up shiny dashboard
 #Create header
@@ -141,7 +143,7 @@ body <- dashboardBody(
                 downloadButton("downloadgraph", "Download Normal Max Intensity Plot"),
                 
                 #Output heat map for Normalized Absolute Max Intensity and Information
-                plotOutput("normMaxIntHeatMap", click = "click"),
+                plotOutput("normMaxIntHeatMap", click = "click") %>% withSpinner(),
                 verbatimTextOutput("info1"),
                 
                 #Add border
@@ -151,7 +153,7 @@ body <- dashboardBody(
                 downloadButton("downloadgraph1", "Download Peak Wavelength Plot"),
                 
                 #Output heat map for Peak Wavelength and Information
-                plotOutput("peakWaveHeatMap", click = "click"),
+                plotOutput("peakWaveHeatMap", click = "click") %>% withSpinner(),
                 verbatimTextOutput("info2")),
         
         #Content for Relative/Wavelength Intensity Plots
@@ -169,7 +171,7 @@ body <- dashboardBody(
                            downloadButton("downloadgraph2", "Download Relative Intensity Plot"),
                            
                            #Heat Map plot of Relative Intensity given two values
-                           plotOutput("RelIntHeatMap", click = "click1"),
+                           plotOutput("RelIntHeatMap", click = "click1") %>% withSpinner(),
                            verbatimTextOutput("info3")
                            
                     ),
@@ -184,7 +186,7 @@ body <- dashboardBody(
                                downloadButton("downloadgraph3", "Download Wavelength 1 Intensity Plot"),
                                
                                #Heat map plot for intensities of wavelength 1
-                               plotOutput("Wave1IntenHeatMap", click = "click2"),
+                               plotOutput("Wave1IntenHeatMap", click = "click2") %>% withSpinner(),
                                verbatimTextOutput("info4"),
                         ),
                         
@@ -194,7 +196,7 @@ body <- dashboardBody(
                                downloadButton("downloadgraph4", "Download Wavelength 2 Intensity Plot"),
                                
                                #Heat map plot for intensities of wavelength 1
-                               plotOutput("Wave2IntenHeatMap", click = "click3"),
+                               plotOutput("Wave2IntenHeatMap", click = "click3") %>% withSpinner(),
                                verbatimTextOutput("info5"))
                     ),
                 )
@@ -242,8 +244,15 @@ body <- dashboardBody(
                 downloadButton("downloadHist","Download Histogram Plot"),
                 
                 #Output Peak Wavelength Histogram and Information
-                plotOutput("peakhist", click = "click4"),
-                verbatimTextOutput("info6")
+                plotOutput("peakhist", click = "click4") %>% withSpinner(),
+                verbatimTextOutput("info6"),
+                
+                #Make sliders for both histograms
+                uiOutput("slider1"),
+                uiOutput("slider2"),
+                
+                #Create histogram for absolute/local histograms
+                plotOutput("abslochist") %>% withSpinner()
                 
         ),
         
@@ -286,11 +295,8 @@ ui <- dashboardPage(header = header,
 server <- function(input, output) {
     
     #Increase file size input
-    options(shiny.maxRequestSize = 30*1024^2)
+    options(shiny.maxRequestSize = 30*1024^2, spinner.type = 8)
     
-    
-    #Window margins for zoomsmooth plot
-    window_margins <- reactiveValues(x = NULL, y = NULL)
     
     ###PREPARATION###
     
@@ -308,6 +314,14 @@ server <- function(input, output) {
         
         #Compute dataframe
         abs_max_func(first_df())
+        
+    })
+    
+    #Get list of all local max values and their corresponding wavelengths for every row
+    local_max_list <- eventReactive(input$file$datapath, {
+        
+        #Determine list of consisting of wavelengths and their corresponding intensities in their respective row
+        local_max_func(first_df())
         
     })
     
@@ -359,6 +373,17 @@ server <- function(input, output) {
         
     })
     
+    #Create local max matrix
+    local_max_points <- eventReactive(input$go1, {
+        
+        #Extract local max points for given row
+        p <- local_max_list()[c(input$rowIndex, input$rowIndex + length(local_max_list())/2)]
+        
+        #Create matrix by first unlisting p and then convert to a matrix where the first row has wavelengths and second row has local max values
+        matrix(unlist(p, use.names = FALSE), nrow = 2, byrow = TRUE)
+        
+    })
+    
     
     ###SLIDER INPUT###
     
@@ -369,6 +394,26 @@ server <- function(input, output) {
         #Lowest number is 1; highest number is how many coordinates there are in the uploaded dataset
         #Default value is 2
         sliderInput("inslider", "Number of Bins:", min = 1, max = length(dataset()[,3]), value = 2)
+        
+    })
+    
+    #Slider for Absolute Max Histogram
+    output$slider1 <- renderUI({
+        
+        #Indicate number of bins
+        #Lowest number is 1; highest number is how many elements are in each vector
+        #Default value is 2
+        sliderInput("inslider1", "Number of Bins (Blue):", min = 1, max = length(dataset()[,5]), value = 2)
+        
+    })
+    
+    #Slider for Local Max Histogram
+    output$slider2 <- renderUI({
+        
+        #Indicate number of bins
+        #Lowest number is 1; highest number is how many elements are in each vector
+        #Default value is 2
+        sliderInput("inslider2", "Number of Bins (Green):", min = 1, max = length(unlist(local_max_list()[(length(local_max_list())/2+1): length(local_max_list())], use.names = FALSE)), value = 2)
         
     })
     
@@ -501,6 +546,24 @@ server <- function(input, output) {
         
         #Use 'bins' as breaks in histogram
         hist(dataset()[,3], breaks = bins, main = "Histogram of Peak Wavelengths", xlab = "Peak Wavelengths", col = "blue", border = "white")
+    
+    })
+    
+    #Make histogram representing the distribution of the absolute/local max values
+    output$abslochist <- renderPlot({
+        
+        w <- unlist(local_max_list()[(length(local_max_list())/2+1): length(local_max_list())], use.names = FALSE)
+        
+        #Calculate break points based on lowest & highest absolute max values along with number of bins
+        bins <- seq(min(dataset()[,5]), max(dataset()[,5]), length.out = input$inslider1 + 1)
+        
+        #Calculate break points based on lowest & highest local max values along with number of bins
+        bins1 <- seq(min(w), max(w), length.out = input$inslider2 + 1)
+        
+        #Use 'bins' as breaks in each histogram
+        hist(dataset()[,5], breaks = bins, main = "Histogram of Absolute/Local Max Values", xlab = "Absolute/Local Max Value", col = "blue", border = "white", xlim = c(min(c(dataset()[,5],w)),max(c(dataset()[,5],w))))
+        hist(w, breaks = bins1, col = rgb(0,1,0,0.5), border = "white", add = TRUE)
+        
     })
     
     
@@ -509,33 +572,38 @@ server <- function(input, output) {
     #Create smoothing spline line and plot it
     output$smoothLine <- renderPlot({
         
-        #Plot smooth spline line on graph
+        #Predict values for each wavelength
+        predicted <- predict(splinesmoothfit(), x = wavelengths())
+        
+        #Plot points for given row on graph
         plot(wavelengths(), y_values(), xlab = "Wavelength", ylab = "Normal Intensity", main = paste("Normal Intensity vs. Wavelength \n X =", coordinates()[1],", Y = ", coordinates()[2]))
         
-        newsplinesmooth <- SmoothSplineAsPiecePoly(splinesmoothfit())
-        xs <- solve(newsplinesmooth, deriv = 1)
-        ys <- predict(newsplinesmooth, xs)
-        
+        #Plot smooth spline line, absolute max point, and local max points
         lines(splinesmoothfit(), col = "red", lwd = 2)
-        points(xs, ys, pch = 20, col = "blue", cex = 3)
-        legend("topright", c("Smoothing Spline","Local Extrema"),  lwd = c(2,NA), col = c("red", "blue"), pch = c(NA, 20), pt.cex = c(NA,3))
+        points(predicted$x[which.max(predicted$y)], max(predicted$y), pch = 20, col = "blue", cex = 3)
+        points(local_max_points()[1,],local_max_points()[2,], pch = 20, col = "green", cex = 3)
+        legend("topright", c("Smoothing Spline","Absolute Max", "Local Max"),  lwd = c(2,NA,NA), col = c("red", "blue","green"), pch = c(NA,20,20), pt.cex = c(NA,3,3))
+        
     })
     
     output$zoomsmooth <- renderPlot({
         
+        #Predict values for each wavelength
+        predicted <- predict(splinesmoothfit(), x = wavelengths())
+        
         #Plot smooth spline line on graph
         plot(wavelengths(), y_values(), xlab = "Wavelength", ylab = "Normal Intensity", xlim = window_margins$x, ylim = window_margins$y)
         
-        newsplinesmooth <- SmoothSplineAsPiecePoly(splinesmoothfit())
-        xs <- solve(newsplinesmooth, deriv = 1)
-        ys <- predict(newsplinesmooth, xs)
-        
+        #Plot smooth spline line, absolute max point, and local max points
         lines(splinesmoothfit(), col = "red", lwd = 2)
-        points(xs, ys, pch = 20, col = "blue", cex = 3)
-        legend("topright", c("Smoothing Spline","Local Extrema"),  lwd = c(2,NA), col = c("red", "blue"), pch = c(NA, 20), pt.cex = c(NA,3))
+        points(predicted$x[which.max(predicted$y)], max(predicted$y), pch = 20, col = "blue", cex = 3)
+        points(local_max_points()[1,],local_max_points()[2,], pch = 20, col = "green", cex = 3)
+        legend("topright", c("Smoothing Spline","Absolute Max", "Local Max"),  lwd = c(2,NA,NA), col = c("red", "blue","green"), pch = c(NA,20,20), pt.cex = c(NA,3,3))
+        
     })
     
     observe({
+        
         brush <- input$smoothPlot_brush
         
         if(!is.null(brush)) {
@@ -545,6 +613,7 @@ server <- function(input, output) {
             window_margins$x <- NULL
             window_margins$y <- NULL
         }
+        
     })
     
     
@@ -828,19 +897,20 @@ server <- function(input, output) {
         #Content for file
         content = function(file){
             
+            #Predict values for each wavelength
+            predicted <- predict(splinesmoothfit(), x = wavelengths())
+            
             #Make svg
             svg(file)
             
-            #Plot smooth spline line on graph
+            #Plot points for given row on graph
             plot(wavelengths(), y_values(), xlab = "Wavelength", ylab = "Normal Intensity", main = paste("Normal Intensity vs. Wavelength \n X =", coordinates()[1],", Y = ", coordinates()[2]))
             
-            newsplinesmooth <- SmoothSplineAsPiecePoly(splinesmoothfit())
-            xs <- solve(newsplinesmooth, deriv = 1)
-            ys <- predict(newsplinesmooth, xs)
-            
+            #Plot smooth spline line, absolute max point, and local max points
             lines(splinesmoothfit(), col = "red", lwd = 2)
-            points(xs, ys, pch = 20, col = "blue", cex = 3)
-            legend("topright", c("Smoothing Spline","Local Extrema"),  lwd = c(2,NA), col = c("red", "blue"), pch = c(NA, 20), pt.cex = c(NA,3))
+            points(predicted$x[which.max(predicted$y)], max(predicted$y), pch = 20, col = "blue", cex = 3)
+            points(local_max_points()[1,],local_max_points()[2,], pch = 20, col = "green", cex = 3)
+            legend("topright", c("Smoothing Spline","Absolute Max", "Local Max"),  lwd = c(2,NA,NA), col = c("red", "blue","green"), pch = c(NA,20,20), pt.cex = c(NA,3,3))
             
             dev.off()    
         }
@@ -865,7 +935,7 @@ server <- function(input, output) {
     })
     
     #Output information for interactive heat map (peak wavelength)
-    output$info2  <- renderPrint({
+    output$info2 <- renderPrint({
         
         #Transform dataset() into dataset_2
         dataset_2 <- reactive({
@@ -879,7 +949,7 @@ server <- function(input, output) {
     })
     
     #Output information for interactive heat map (Relative Intensity)
-    output$info3  <- renderPrint({
+    output$info3 <- renderPrint({
         
         #Transform bigger_data() into dataset_2
         dataset_2 <- reactive({
@@ -959,16 +1029,16 @@ server <- function(input, output) {
         
     })
     
-    #Output information for smoothing spline: local max and mins through brush
+    #Output information for smoothing spline: local max through brush
     output$info7 <- renderPrint({
         
-        #Determine x ad y values of local max/min
-        newsplinesmooth <- SmoothSplineAsPiecePoly(splinesmoothfit())
-        invisible(capture.output(Wavelength <- solve(newsplinesmooth, deriv = 1)))
-        Normal_Intensity <- predict(newsplinesmooth, Wavelength)
+        #Determine x and y values of local max
+        Wavelength <- local_max_points()[1,]
+        Normal_Intensity <- local_max_points()[2,]
         
         #Print local max/min points
         brushedPoints(data.frame(Wavelength, Normal_Intensity), input$smoothPlot_brush, xvar = "Wavelength", yvar = "Normal_Intensity")
+        
     })
     
     
