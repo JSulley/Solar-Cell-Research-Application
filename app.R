@@ -8,8 +8,8 @@ library(shinydashboard)
 library(data.table)
 library(dplyr)
 library(SplinesUtils)
-source("R scripts/Absolute Max Function 2.0.R")
 source("R scripts/Absolute Max Function.R")
+source("R scripts/Absolute Max Function 2.0.R")
 
 #Set up shiny dashboard
 #Create header
@@ -254,7 +254,7 @@ body <- dashboardBody(
                 #Output smoothing spline plot
                 plotOutput("smoothLine", brush = brushOpts("smoothPlot_brush",resetOnNew = TRUE)),
                 
-                ########Output smoothing spline plot
+                #Output smoothing spline plot
                 plotOutput("zoomsmooth"),
                 verbatimTextOutput("info7")
                 
@@ -287,7 +287,7 @@ server <- function(input, output) {
     options(shiny.maxRequestSize = 30*1024^2)
     
     
-    ######Window margins for zoomsmooth plot
+    #Window margins for zoomsmooth plot
     window_margins <- reactiveValues(x = NULL, y = NULL)
     
     
@@ -300,10 +300,9 @@ server <- function(input, output) {
         if (grepl("\\.txt", input$file$datapath)) {read_tsv(input$file$datapath, col_names = FALSE)}
         else {read_csv(input$file$datapath, col_names = FALSE)}
         
-        
     })
     
-    #Use abs_max_func (Absolute Max Function.R) for dataset
+    #Use abs_max_func (Absolute Max Function.R) for data frame
     dataset <- eventReactive(input$file$datapath,{
 
         #Compute dataframe
@@ -955,7 +954,7 @@ server <- function(input, output) {
         
     })
     
-    ######Output information for smoothing spline: local max and mins through brush
+    #Output information for smoothing spline: local max and mins through brush
     output$info7 <- renderPrint({
         
         #Create smooth spline function
