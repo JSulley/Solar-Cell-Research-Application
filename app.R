@@ -70,67 +70,67 @@ body <- dashboardBody(
         tabItem(tabName = "introduction",
                 
                 fluidPage(
-                #Greet the user
-                h1("Welcome!"),
-                h2("Click on the any of the tabs for information you need to know!"),
-                
-                #Organize information
-                tabBox(width = 9,
+                    #Greet the user
+                    h1("Welcome!"),
+                    h2("Click on the any of the tabs for information you need to know!"),
                     
-                    #Notes for uploading the file
-                    tabPanel("File Format for Upload",
-                             
-                             #Make note to user for what the app is expecting as an input
-                             p("The program assumes the CSV file as the following format:"),
-                             p("1. The first row is the wavelengths."),
-                             p("2. The first two columns are the x and y coordinates."),
-                             p("3. Nothing in the first two boxes."),
-                             p("4. The rest are the intensities."),
-                             strong(em("Example:")),
-                             br(),
-                             
-                             #Image demonstrating format of CSV file
-                             img(src = "Example Data.PNG", height = 200, width = 350),
-                    ),
+                    #Organize information
+                    tabBox(width = 9,
+                           
+                           #Notes for uploading the file
+                           tabPanel("File Format for Upload",
+                                    
+                                    #Make note to user for what the app is expecting as an input
+                                    p("The program assumes the CSV file as the following format:"),
+                                    p("1. The first row is the wavelengths."),
+                                    p("2. The first two columns are the x and y coordinates."),
+                                    p("3. Nothing in the first two boxes."),
+                                    p("4. The rest are the intensities."),
+                                    strong(em("Example:")),
+                                    br(),
+                                    
+                                    #Image demonstrating format of CSV file
+                                    img(src = "Example Data.PNG", height = 200, width = 350),
+                           ),
+                           
+                           #Note regarding downloading plots.
+                           tabPanel("Downloading Plots/Tables",
+                                    p("You are able to download the plots/tables displayed!"),
+                                    p("The plots are downloaded in SVG format, while the tables are downloaded as a CSV file."),
+                                    p("For Table 2 to appear, you", strong("must"), "input two different wavelengths first."),
+                                    
+                                    #Note what calculation is being done for relative intensity
+                                    p(strong(em("Note:")), "For the relative intensity, it is the ratio of", HTML(paste0("&lambda;",tags$sub(1))) ,"intensity to",
+                                      HTML(paste0("&lambda;",tags$sub(2))) ,"intensity")),
+                           
+                           #Note recent features
+                           tabPanel("More Features",
+                                    
+                                    #Interactive Peak Wavelength Histogram
+                                    h3("Peak Wavelength Interactive Histogram"),
+                                    p("The distribution of the peak wavelengths can be now viewed in the tab labeled 'Peak Wavelength Histogram'. Make sure to upload the file first!"),
+                                    hr(),
+                                    
+                                    #Smoothing Spline Interpolation Output
+                                    h3("Smoothing Spline View"),
+                                    p("Now for any coordinate, the scatterplot of the normal intensities with the smoothing spline line graphed can be viewed!"),
+                                    p("Just simply enter the row number, and the program will generate the plot."),
+                                    p("Where is the row number? To view it, click on the tile of interest. Then the first number to the left is it."),
+                                    p("Here is an example:"),
+                                    img(src = "Example Row Number.png", height = 200, width = 350),
+                                    p("The row number is 1, which would then be inputted in the box labeled 'Smooth Spline Interpolation Display Input'. Now, press 'Go!' and click on the 'Export AllSpectra' tab to see the graph!"),
+                           hr(),
+                           
+                           #Interactive Smooth Spline
+                           h3("Interactive Smoothing Spline"),
+                           p("The smoothing spline plot is now interactive! You can click and drag over a portion of the plot, and the program will display what is inside the region with the window margins specified."),
+                           p("In other words, you can zoom into the plot with the result presented underneath it."),
+                           p("Additionally, the region specified can be moved around by clicking and holding the specified region and placing it over a different area."),
+                           p("The local extrema for the smoothing spline plot are now displayed. When the selected region covers any of these points, the program displays their values."),
+                           p("Here is an example:"),
+                           img(src = "Screenshot.PNG", height = 520, width = 870))
+                    )   
                     
-                    #Note regarding downloading plots.
-                    tabPanel("Downloading Plots/Tables",
-                             p("You are able to download the plots/tables displayed!"),
-                             p("The plots are downloaded in SVG format, while the tables are downloaded as a CSV file."),
-                             p("For Table 2 to appear, you", strong("must"), "input two different wavelengths first."),
-                             
-                             #Note what calculation is being done for relative intensity
-                             p(strong(em("Note:")), "For the relative intensity, it is the ratio of", HTML(paste0("&lambda;",tags$sub(1))) ,"intensity to",
-                               HTML(paste0("&lambda;",tags$sub(2))) ,"intensity")),
-                    
-                    #Note recent features
-                    tabPanel("More Features",
-                             
-                             #Interactive Peak Wavelength Histogram
-                             h3("Peak Wavelength Interactive Histogram"),
-                             p("The distribution of the peak wavelengths can be now viewed in the tab labeled 'Peak Wavelength Histogram'. Make sure to upload the file first!"),
-                             hr(),
-                             
-                             #Smoothing Spline Interpolation Output
-                             h3("Smoothing Spline View"),
-                             p("Now for any coordinate, the scatterplot of the normal intensities with the smoothing spline line graphed can be viewed!"),
-                             p("Just simply enter the row number, and the program will generate the plot."),
-                             p("Where is the row number? To view it, click on the tile of interest. Then the first number to the left is it."),
-                             p("Here is an example:"),
-                             img(src = "Example Row Number.png", height = 200, width = 350),
-                             p("The row number is 1, which would then be inputted in the box labeled 'Smooth Spline Interpolation Display Input'. Now, press 'Go!' and click on the 'Export AllSpectra' tab to see the graph!")),
-                             hr(),
-                    
-                             #Interactive Smooth Spline
-                             h3("Interactive Smoothing Spline"),
-                             p("The smoothing spline plot is now interactive! You can click and drag over a portion of the plot, and the program will display what is inside the region with the window margins specified."),
-                             p("In other words, you can zoom into the plot with the result presented underneath it."),
-                             p("Additionally, the region specified can be moved around by clicking and holding the specified region and placing it over a different area."),
-                             p("The local extrema for the smoothing spline plot are now displayed. When the selected region covers any of these points, the program displays their values."),
-                             p("Here is an example:"),
-                             img(src = "Screenshot.PNG", height = 520, width = 870)
-                )   
-                            
                 )
         ),
         
@@ -255,7 +255,7 @@ body <- dashboardBody(
                 
                 #Output smoothing spline plot
                 plotOutput("smoothLine", brush = brushOpts("smoothPlot_brush",resetOnNew = TRUE)),
-               
+                
                 #Output zoomed smoothing spline plot
                 plotOutput("zoomsmooth"),
                 verbatimTextOutput("info7")
@@ -291,7 +291,7 @@ server <- function(input, output) {
     
     #Window margins for zoomsmooth plot
     window_margins <- reactiveValues(x = NULL, y = NULL)
-
+    
     ###PREPARATION###
     
     #Read uploaded file
@@ -369,8 +369,8 @@ server <- function(input, output) {
         #Lowest number is 1; highest number is how many coordinates there are in the uploaded dataset
         #Default value is 2
         sliderInput("inslider", "Number of Bins:", min = 1, max = length(dataset()[,3]), value = 2)
-    
-        })
+        
+    })
     
     
     ###HEAT MAP PLOTS###
