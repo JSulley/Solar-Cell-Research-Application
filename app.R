@@ -13,7 +13,7 @@ source("R scripts/Absolute Max Function 2.0.R")
 
 #Set up shiny dashboard
 #Create header
-header <- dashboardHeader(title = "Solar Cell Research")
+header <- dashboardHeader(title = "Solar Cell Research Beta")
 
 #Create sidebar
 sidebar <- dashboardSidebar(
@@ -76,127 +76,129 @@ body <- dashboardBody(
                 
                 #Organize information
                 tabBox(width = 9,
-                
-                #Notes for uploading the file
-                tabPanel("File Format for Upload",
-                         
-                         #Make note to user for what the app is expecting as an input
-                         p("The program assumes the CSV file as the following format:"),
-                         p("1. The first row is the wavelengths."),
-                         p("2. The first two columns are the x and y coordinates."),
-                         p("3. Nothing in the first two boxes."),
-                         p("4. The rest are the intensities."),
-                         strong(em("Example:")),
-                         br(),
-                         
-                         #Image demonstrating format of CSV file
-                         img(src = "Example Data.PNG", height = 200, width = 350),
-                         ),
-                
-                #Note regarding downloading plots.
-                tabPanel("Downloading Plots/Tables",
-                p("You are able to download the plots/tables displayed!"),
-                p("The plots are downloaded in SVG format, while the tables are downloaded as a CSV file."),
-                p("For Table 2 to appear, you", strong("must"), "input two different wavelengths first."),
-                
-                #Note what calculation is being done for relative intensity
-                p(strong(em("Note:")), "For the relative intensity, it is the ratio of", HTML(paste0("&lambda;",tags$sub(1))) ,"intensity to",
-                  HTML(paste0("&lambda;",tags$sub(2))) ,"intensity")),
-                
-                #Note recent features
-                tabPanel("More Features",
-                
-                #Interactive Peak Wavelength Histogram
-                h3("Peak Wavelength Interactive Histogram"),
-                p("The distribution of the peak wavelengths can be now viewed in the tab labeled 'Peak Wavelength Histogram'. Make sure to upload the file first!"),
-                hr(),
-                
-                #Smoothing Spline Interpolation Output
-                h3("Smoothing Spline View"),
-                p("Now for any coordinate, the scatterplot of the normal intensities with the smoothing spline line graphed can be viewed!"),
-                p("Just simply enter the row number, and the program will generate the plot."),
-                p("Where is the row number? To view it, click on the tile of interest. Then the first number to the left is it."),
-                p("Here is an example:"),
-                img(src = "Example Row Number.png", height = 200, width = 350),
-                p("The row number is 1, which would then be inputted in the box labeled 'Smooth Spline Interpolation Display Input'. Now, press 'Go!' and click on the 'Export AllSpectra' tab to see the graph!"),
-                hr(),
-                
-                #Interactive Smooth Spline
-                h3("Interactive Smoothing Spline"),
-                p("The smoothing spline plot is now interactive! You can click and drag over a portion of the plot, and the program will display what is inside the region with the window margins specified."),
-                p("In other words, you can zoom into the plot with the result presented underneath it."),
-                p("Additionally, the region specified can be moved around by clicking and holding the specified region and placing it over a different area."),
-                p("The local extrema for the smoothing spline plot are now displayed. When the selected region covers any of these points, the program displays their values."),
-                p("Here is an example:"),
-                img(src = "Screenshot.PNG", height = 520, width = 870)
-                ))
-        )
+                    
+                    #Notes for uploading the file
+                    tabPanel("File Format for Upload",
+                             
+                             #Make note to user for what the app is expecting as an input
+                             p("The program assumes the CSV file as the following format:"),
+                             p("1. The first row is the wavelengths."),
+                             p("2. The first two columns are the x and y coordinates."),
+                             p("3. Nothing in the first two boxes."),
+                             p("4. The rest are the intensities."),
+                             strong(em("Example:")),
+                             br(),
+                             
+                             #Image demonstrating format of CSV file
+                             img(src = "Example Data.PNG", height = 200, width = 350),
+                    ),
+                    
+                    #Note regarding downloading plots.
+                    tabPanel("Downloading Plots/Tables",
+                             p("You are able to download the plots/tables displayed!"),
+                             p("The plots are downloaded in SVG format, while the tables are downloaded as a CSV file."),
+                             p("For Table 2 to appear, you", strong("must"), "input two different wavelengths first."),
+                             
+                             #Note what calculation is being done for relative intensity
+                             p(strong(em("Note:")), "For the relative intensity, it is the ratio of", HTML(paste0("&lambda;",tags$sub(1))) ,"intensity to",
+                               HTML(paste0("&lambda;",tags$sub(2))) ,"intensity")),
+                    
+                    #Note recent features
+                    tabPanel("More Features",
+                             
+                             #Interactive Peak Wavelength Histogram
+                             h3("Peak Wavelength Interactive Histogram"),
+                             p("The distribution of the peak wavelengths can be now viewed in the tab labeled 'Peak Wavelength Histogram'. Make sure to upload the file first!"),
+                             hr(),
+                             
+                             #Smoothing Spline Interpolation Output
+                             h3("Smoothing Spline View"),
+                             p("Now for any coordinate, the scatterplot of the normal intensities with the smoothing spline line graphed can be viewed!"),
+                             p("Just simply enter the row number, and the program will generate the plot."),
+                             p("Where is the row number? To view it, click on the tile of interest. Then the first number to the left is it."),
+                             p("Here is an example:"),
+                             img(src = "Example Row Number.png", height = 200, width = 350),
+                             p("The row number is 1, which would then be inputted in the box labeled 'Smooth Spline Interpolation Display Input'. Now, press 'Go!' and click on the 'Export AllSpectra' tab to see the graph!")),
+                             hr(),
+                    
+                             #Interactive Smooth Spline
+                             h3("Interactive Smoothing Spline"),
+                             p("The smoothing spline plot is now interactive! You can click and drag over a portion of the plot, and the program will display what is inside the region with the window margins specified."),
+                             p("In other words, you can zoom into the plot with the result presented underneath it."),
+                             p("Additionally, the region specified can be moved around by clicking and holding the specified region and placing it over a different area."),
+                             p("The local extrema for the smoothing spline plot are now displayed. When the selected region covers any of these points, the program displays their values."),
+                             p("Here is an example:"),
+                             img(src = "Screenshot.PNG", height = 520, width = 870)
+                )   
+                            
+                )
         ),
         
         #Content for "Dataset Plots"
         tabItem(tabName = "datasetDash",
-                       
-               #Download button for Normalized Absolute Max Intensity Heat Map
-               downloadButton("downloadgraph", "Download Normal Max Intensity Plot"),
-               
-               #Output heat map for Normalized Absolute Max Intensity and Information
-               plotOutput("normMaxIntHeatMap", click = "click"),
-               verbatimTextOutput("info1"),
-               
-               #Add border
-               hr(),
-               
-               #Make download button for Peak Wavelength Heat Map
-               downloadButton("downloadgraph1", "Download Peak Wavelength Plot"),
-               
-               #Output heat map for Peak Wavelength and Information
-               plotOutput("peakWaveHeatMap", click = "click"),
-               verbatimTextOutput("info2")),
+                
+                #Download button for Normalized Absolute Max Intensity Heat Map
+                downloadButton("downloadgraph", "Download Normal Max Intensity Plot"),
+                
+                #Output heat map for Normalized Absolute Max Intensity and Information
+                plotOutput("normMaxIntHeatMap", click = "click"),
+                verbatimTextOutput("info1"),
+                
+                #Add border
+                hr(),
+                
+                #Make download button for Peak Wavelength Heat Map
+                downloadButton("downloadgraph1", "Download Peak Wavelength Plot"),
+                
+                #Output heat map for Peak Wavelength and Information
+                plotOutput("peakWaveHeatMap", click = "click"),
+                verbatimTextOutput("info2")),
         
         #Content for Relative/Wavelength Intensity Plots
         tabItem(tabName = "relativeDash",
                 
                 #Make fluid row for interactive relative intensity map 
                 fluidRow(
-                h3(strong(em("Note:")), "Did you change the inputs for one or both wavelengths, but the plot(s) look(s) the same/did not change?
-                   Make sure you pressed Go! after updating any wavelength values!", align = "center"),
-                
-                column(12,
-                       
-                   #Make download button for Relative Intensity Heat Map
-                   downloadButton("downloadgraph2", "Download Relative Intensity Plot"),
-                   
-                   #Heat Map plot of Relative Intensity given two values
-                   plotOutput("RelIntHeatMap", click = "click1"),
-                   verbatimTextOutput("info3")
-                   
-                ),
-               
-                 
-                #Make fluid row for interactive intensities for both inputted wavelengths
-                fluidRow(
                     
-                    column(6,
+                    h3(strong(em("Note:")), "Did you change the inputs for one or both wavelengths, but the plot(s) look(s) the same/did not change?
+                   Make sure you pressed Go! after updating any wavelength values!", align = "center"),
+                    
+                    column(12,
                            
-                       #Make download button for heat map of inputted wavelength 1 
-                       downloadButton("downloadgraph3", "Download Wavelength 1 Intensity Plot"),
-                       
-                       #Heat map plot for intensities of wavelength 1
-                       plotOutput("Wave1IntenHeatMap", click = "click2"),
-                       verbatimTextOutput("info4"),
+                           #Make download button for Relative Intensity Heat Map
+                           downloadButton("downloadgraph2", "Download Relative Intensity Plot"),
+                           
+                           #Heat Map plot of Relative Intensity given two values
+                           plotOutput("RelIntHeatMap", click = "click1"),
+                           verbatimTextOutput("info3")
+                           
                     ),
                     
-                    column(6,
-                           
-                       #Make download button for heat map of inputted wavelength 1 
-                       downloadButton("downloadgraph4", "Download Wavelength 2 Intensity Plot"),
-                       
-                       #Heat map plot for intensities of wavelength 1
-                       plotOutput("Wave2IntenHeatMap", click = "click3"),
-                       verbatimTextOutput("info5"))
-                )),
                     
-                ),
+                    #Make fluid row for interactive intensities for both inputted wavelengths
+                    fluidRow(
+                        
+                        column(6,
+                               
+                               #Make download button for heat map of inputted wavelength 1 
+                               downloadButton("downloadgraph3", "Download Wavelength 1 Intensity Plot"),
+                               
+                               #Heat map plot for intensities of wavelength 1
+                               plotOutput("Wave1IntenHeatMap", click = "click2"),
+                               verbatimTextOutput("info4"),
+                        ),
+                        
+                        column(6,
+                               
+                               #Make download button for heat map of inputted wavelength 1 
+                               downloadButton("downloadgraph4", "Download Wavelength 2 Intensity Plot"),
+                               
+                               #Heat map plot for intensities of wavelength 1
+                               plotOutput("Wave2IntenHeatMap", click = "click3"),
+                               verbatimTextOutput("info5"))
+                    ),
+                )
+        ),
         
         #Content for "Dataset Tables" tab
         tabItem(tabName = "tables",
@@ -228,7 +230,7 @@ body <- dashboardBody(
                            #Output table regarding inputted wavelengths
                            tableOutput('table1')),
                 )
-                ),
+        ),
         
         #Content for "Peak Wavelength Histogram" tab
         tabItem(tabName = "peakhistogram",
@@ -243,7 +245,7 @@ body <- dashboardBody(
                 plotOutput("peakhist", click = "click4"),
                 verbatimTextOutput("info6")
                 
-                ),
+        ),
         
         #Content for "Export Allspectra" tab
         tabItem(tabName = "smoothSpline",
@@ -253,24 +255,24 @@ body <- dashboardBody(
                 
                 #Output smoothing spline plot
                 plotOutput("smoothLine", brush = brushOpts("smoothPlot_brush",resetOnNew = TRUE)),
-                
-                #Output smoothing spline plot
+               
+                #Output zoomed smoothing spline plot
                 plotOutput("zoomsmooth"),
                 verbatimTextOutput("info7")
                 
-                ),
+        ),
         
         #Content for "About" tab
         tabItem(tabName = "about",
                 
                 #Write about application
                 h1("About the Application"),
-
+                
                 h3("It imports a cathodoluminescence dataset, which is obtained from images of a photovoltaic cell. It can visualize the characterization of the luminescence of solar cells, distribution of the wavelengths associated with the luminescense, the relationship between both luminescence and the wavelengths and more."), 
                 h3("The application can also export the plots/tables."),
                 h3("It is a product of the collaboration between the Mathematics Department and the Engineering Techonology Department at Texas A&M University-Central Texas. It is meant to enhance the Engineering Technology Department's research about solar cells through statistics."),
                 h3("The application is still updated from time to time.")
-)
+        )
     ))
 
 
@@ -289,8 +291,7 @@ server <- function(input, output) {
     
     #Window margins for zoomsmooth plot
     window_margins <- reactiveValues(x = NULL, y = NULL)
-    
-    
+
     ###PREPARATION###
     
     #Read uploaded file
@@ -304,11 +305,14 @@ server <- function(input, output) {
     
     #Use abs_max_func (Absolute Max Function.R) for data frame
     dataset <- eventReactive(input$file$datapath,{
-
+        
         #Compute dataframe
         abs_max_func(first_df())
         
     })
+    
+    #Window margins for zoomsmooth plot
+    window_margins <- reactiveValues(x = NULL, y = NULL)
     
     
     ###ACTION BUTTONS###
@@ -318,7 +322,7 @@ server <- function(input, output) {
         
         #Combine dataset() with dataframe created by abs_max_func_2 (Absolute Max Function 2.0.R) by column
         cbind(dataset(),abs_max_func_2(first_df(),input$wavelength1,input$wavelength2))
-
+        
     })
     
     #Extract wavelengths from uploaded dataset
@@ -337,7 +341,15 @@ server <- function(input, output) {
         
         #Normalize them by dividing by the largest intensity value
         regular_y_val/max(regular_y_val)
+        
     })
+    
+    #Create smooth spline function
+    splinesmoothfit <- eventReactive(input$go1, {
+        
+        smooth.spline(x = wavelengths(), y = y_values())
+        
+    }) 
     
     #Get coordinates
     coordinates <- eventReactive(input$go1,{
@@ -357,8 +369,9 @@ server <- function(input, output) {
         #Lowest number is 1; highest number is how many coordinates there are in the uploaded dataset
         #Default value is 2
         sliderInput("inslider", "Number of Bins:", min = 1, max = length(dataset()[,3]), value = 2)
-    })
-
+    
+        })
+    
     
     ###HEAT MAP PLOTS###
     
@@ -489,41 +502,35 @@ server <- function(input, output) {
         #Use 'bins' as breaks in histogram
         hist(dataset()[,3], breaks = bins, main = "Histogram of Peak Wavelengths", xlab = "Peak Wavelengths", col = "blue", border = "white")
     })
-
+    
     
     ###SMOOTH SPLINE INTERPOLATION GRAPH###
     
     #Create smoothing spline line and plot it
     output$smoothLine <- renderPlot({
-    
-        #Create smooth spline function
-        splinesmoothfit <- smooth.spline(x = wavelengths(), y = y_values())
         
         #Plot smooth spline line on graph
         plot(wavelengths(), y_values(), xlab = "Wavelength", ylab = "Normal Intensity", main = paste("Normal Intensity vs. Wavelength \n X =", coordinates()[1],", Y = ", coordinates()[2]))
         
-        newsplinesmooth <- SmoothSplineAsPiecePoly(splinesmoothfit)
+        newsplinesmooth <- SmoothSplineAsPiecePoly(splinesmoothfit())
         xs <- solve(newsplinesmooth, deriv = 1)
         ys <- predict(newsplinesmooth, xs)
         
-        lines(splinesmoothfit, col = "red", lwd = 2)
+        lines(splinesmoothfit(), col = "red", lwd = 2)
         points(xs, ys, pch = 20, col = "blue", cex = 3)
         legend("topright", c("Smoothing Spline","Local Extrema"),  lwd = c(2,NA), col = c("red", "blue"), pch = c(NA, 20), pt.cex = c(NA,3))
-        
     })
     
     output$zoomsmooth <- renderPlot({
-        #Create smooth spline function
-        splinesmoothfit <- smooth.spline(x = wavelengths(), y = y_values())
         
         #Plot smooth spline line on graph
         plot(wavelengths(), y_values(), xlab = "Wavelength", ylab = "Normal Intensity", xlim = window_margins$x, ylim = window_margins$y)
         
-        newsplinesmooth <- SmoothSplineAsPiecePoly(splinesmoothfit)
+        newsplinesmooth <- SmoothSplineAsPiecePoly(splinesmoothfit())
         xs <- solve(newsplinesmooth, deriv = 1)
         ys <- predict(newsplinesmooth, xs)
         
-        lines(splinesmoothfit, col = "red", lwd = 2)
+        lines(splinesmoothfit(), col = "red", lwd = 2)
         points(xs, ys, pch = 20, col = "blue", cex = 3)
         legend("topright", c("Smoothing Spline","Local Extrema"),  lwd = c(2,NA), col = c("red", "blue"), pch = c(NA, 20), pt.cex = c(NA,3))
     })
@@ -586,8 +593,8 @@ server <- function(input, output) {
             
             #Name file
             paste0("Peak Wavelength Plot", ".svg")
-        
-            },
+            
+        },
         
         #Content for file
         content = function(file){
@@ -662,14 +669,14 @@ server <- function(input, output) {
         #Content for file
         content = function(file){
             
-            #Tranform bigger_data() into dataset_2
+            #Transform bigger_data() into dataset_2
             dataset_2 <- reactive({
                 
                 test <- bigger_data()
                 colnames(test) <- c("X","Y","Wavelength","Intensity", "Normal Intensity","Wavelength 1 Intensity","Wavelength 2 Intensity", "Normal_Wave_1_Intensity", "Normal Wave 2 Intensity" , "Relative Intensity")
                 test
-            
-                })
+                
+            })
             
             #Make ggplot2 static plot
             p <- ggplot(dataset_2(), aes(X, Y, fill= Normal_Wave_1_Intensity)) + 
@@ -730,7 +737,7 @@ server <- function(input, output) {
             
             #Name of file
             paste0("Table 1", ".csv")
-
+            
         },
         
         #Content for file
@@ -744,7 +751,7 @@ server <- function(input, output) {
                 test
                 
             })
-        
+            
             #Create CSV
             write.csv(dataset_2(), file, row.names = FALSE, sep = ',')
             
@@ -771,7 +778,7 @@ server <- function(input, output) {
             
             #Assign column names
             colnames(data) <- c(paste("Wavelength 1 Intensity",input$wavelength1), paste("Wavelength 2 Intensity",input$wavelength2), "Wavelength 1 Normal Intensity", "Wavelength 2 Normal Intensity", "Relative Intensity")
-        
+            
             #Create CSV File
             write.csv(data, file, row.names = FALSE, sep = ',')
         }
@@ -821,20 +828,17 @@ server <- function(input, output) {
         #Content for file
         content = function(file){
             
-            #Create smooth spline function
-            splinesmoothfit <- smooth.spline(x = wavelengths(), y = y_values())
-
             #Make svg
             svg(file)
             
             #Plot smooth spline line on graph
             plot(wavelengths(), y_values(), xlab = "Wavelength", ylab = "Normal Intensity", main = paste("Normal Intensity vs. Wavelength \n X =", coordinates()[1],", Y = ", coordinates()[2]))
             
-            newsplinesmooth <- SmoothSplineAsPiecePoly(splinesmoothfit)
+            newsplinesmooth <- SmoothSplineAsPiecePoly(splinesmoothfit())
             xs <- solve(newsplinesmooth, deriv = 1)
             ys <- predict(newsplinesmooth, xs)
             
-            lines(splinesmoothfit, col = "red", lwd = 2)
+            lines(splinesmoothfit(), col = "red", lwd = 2)
             points(xs, ys, pch = 20, col = "blue", cex = 3)
             legend("topright", c("Smoothing Spline","Local Extrema"),  lwd = c(2,NA), col = c("red", "blue"), pch = c(NA, 20), pt.cex = c(NA,3))
             
@@ -842,7 +846,7 @@ server <- function(input, output) {
         }
         
     )
-
+    
     
     ###OUTPUT INFORMATION###
     
@@ -858,7 +862,7 @@ server <- function(input, output) {
         
         #Display row information
         nearPoints(dataset_2()[,-c(3,4)], input$click, threshold = 15, maxpoints = 1)
-        })
+    })
     
     #Output information for interactive heat map (peak wavelength)
     output$info2  <- renderPrint({
@@ -869,7 +873,7 @@ server <- function(input, output) {
             colnames(test) <- c("X","Y","Wavelength","Intensity", "Normal Intensity")
             test
         })
-
+        
         #Display row information
         nearPoints(dataset_2()[,-c(4,5)], input$click, threshold = 15, maxpoints = 1)
     })
@@ -932,12 +936,13 @@ server <- function(input, output) {
         #Create reactive value for current peak wavelength histogram
         z <- reactive({
             hist(dataset()[,3], breaks = bins, main = "Histogram of Peak Wavelengths", xlab = "Peak Wavelengths", col = "blue", border = "white")
-    })
+        })
+        
         #Transform dataset() into dataset_2
         dataset_2 <- reactive({
-        test <- dataset()
-        colnames(test) <- c("X","Y","Wavelength","Intensity","Normal Intensity")
-        test
+            test <- dataset()
+            colnames(test) <- c("X","Y","Wavelength","Intensity","Normal Intensity")
+            test
         })
         
         #Determine indexes of limits where mouse is between
@@ -957,11 +962,8 @@ server <- function(input, output) {
     #Output information for smoothing spline: local max and mins through brush
     output$info7 <- renderPrint({
         
-        #Create smooth spline function
-        splinesmoothfit <- smooth.spline(x = wavelengths(), y = y_values())
-        
         #Determine x ad y values of local max/min
-        newsplinesmooth <- SmoothSplineAsPiecePoly(splinesmoothfit)
+        newsplinesmooth <- SmoothSplineAsPiecePoly(splinesmoothfit())
         invisible(capture.output(Wavelength <- solve(newsplinesmooth, deriv = 1)))
         Normal_Intensity <- predict(newsplinesmooth, Wavelength)
         
