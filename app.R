@@ -255,7 +255,7 @@ body <- dashboardBody(
                 
                 #Output smoothing spline plot
                 plotOutput("smoothLine", brush = brushOpts("smoothPlot_brush",resetOnNew = TRUE)),
-                
+               
                 #Output zoomed smoothing spline plot
                 plotOutput("zoomsmooth"),
                 verbatimTextOutput("info7")
@@ -289,6 +289,9 @@ server <- function(input, output) {
     options(shiny.maxRequestSize = 30*1024^2)
     
     
+    #Window margins for zoomsmooth plot
+    window_margins <- reactiveValues(x = NULL, y = NULL)
+
     ###PREPARATION###
     
     #Read uploaded file
@@ -300,7 +303,7 @@ server <- function(input, output) {
         
     })
     
-    #Use abs_max_func (Absolute Max Function.R) for dataset
+    #Use abs_max_func (Absolute Max Function.R) for data frame
     dataset <- eventReactive(input$file$datapath,{
         
         #Compute dataframe
