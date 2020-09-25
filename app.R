@@ -13,7 +13,7 @@ source("R scripts/Absolute Max Function 2.0.R")
 
 #Set up shiny dashboard
 #Create header
-header <- dashboardHeader(title = "Solar Cell Research Beta")
+header <- dashboardHeader(title = "Solar Cell Research")
 
 #Create sidebar
 sidebar <- dashboardSidebar(
