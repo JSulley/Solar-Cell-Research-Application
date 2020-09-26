@@ -13,6 +13,9 @@ abs_max_func <- function(x) {
   dataset_wavelengths <- unlist(x[1,-c(1,2)], use.names = FALSE)
   x <- x[-1,]
   
+  #Determine x values of endpoints
+  endpoints_x <- c(min(dataset_wavelengths), max(dataset_wavelengths))
+  
   #Get the coordinates from the data set and omit the first two columns from data frame
   x_coordinate <- unlist(x[,1], use.names = FALSE)
   y_coordinate <- unlist(x[,2], use.names = FALSE)
@@ -32,20 +35,34 @@ abs_max_func <- function(x) {
     #Make smooth spline with wavelengths on the horizontal axis and the corresponding intensities
     #on the vertical axis
     splinesmoothfit <- smooth.spline(x = dataset_wavelengths, y = ith_row)
+    predicted <- predict(splinesmoothfit, x = endpoints_x)
+    endpoints_y <- unlist(predicted$y, use.names = FALSE)
     
-    #Use the smooth spline line to predict the values for each wavelength
-    #Find the y-values for each wavelength on smooth interpolation
-    xyTabSmooth <- predict(splinesmoothfit, x = data.frame(dataset_wavelengths))
+    #Solve for critical values where derivative equals to 0
+    newsmooth <- SmoothSplineAsPiecePoly(splinesmoothfit)
+    xs <- solve(newsmooth, deriv = 1)
+    ys <- predict(newsmooth, xs)
     
-    #Make xyTabSmooth into data frame
-    xyTabSmooth <- as.data.frame(xyTabSmooth)
-    colnames(xyTabSmooth) <- c("Wavelength", "Y Value")
+    #Determine where max value lies
+    if (max(ys) > max(endpoints_y)) {
+      
+      #If local extrema contains the absolute max
+      abs_y <- max(ys)
+      abs_x <- xs[which.max(ys)]
+      
+    } else {
+      
+      #If either endpoints has absolute max
+      abs_y <- max(endpoints_y)
+      abs_x <- endpoints_x[which.max(endpoints_y)]
+      
+    }
     
-    #Determine the highest y-value for it and locate the 
-    #wavelength that corresponds to it and search for duplicates and add to table
-    wavelength_list[[i]] <- data.frame(x_coordinate[i],y_coordinate[i],dataset_wavelengths[which.max(xyTabSmooth[,2])],xyTabSmooth[which.max(xyTabSmooth[,2]),2])
+    #Place row's coordinates and absolute max coordinates into dataframe
+    wavelength_list[[i]] <- data.frame(x_coordinate[i],y_coordinate[i], abs_x, abs_y)
     
   }
+  
   #Bind all the rows of the list together and make the object a data frame
   wavelength_df <- as.data.frame(rbindlist(wavelength_list))
   
@@ -53,7 +70,7 @@ abs_max_func <- function(x) {
   #every number in the "intensity" column by the max intensity.
   normalized_int <- wavelength_df[,4]/max(wavelength_df[,4])
   
-  #Combine data frame with the normalized intensity vector
+  #Combine data frame with the normalized intensity values
   wavelength_df <- cbind(wavelength_df, normalized_int)
   
   wavelength_df
