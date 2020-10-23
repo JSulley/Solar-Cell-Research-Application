@@ -60,11 +60,11 @@ local_max_func <- function(x) {
     local_max_x <- xs[which(ext_val == 1)]
     
     #Determine absolute max value
-    if (max(ys) > max(endpoints_y)) {
+    if (max(local_max_y) > max(endpoints_y)) {
       
       #If local extrema contains the absolute max
-      abs_y <- max(ys)
-      abs_x <- xs[which.max(ys)]
+      abs_y <- max(local_max_y)
+      abs_x <- local_max_x[which.max(local_max_y)]
       
     } else {
       
@@ -78,8 +78,8 @@ local_max_func <- function(x) {
     if (abs_y %in% local_max_y) {
       
       #If it is in the local_max_y, get rid of it along with its corresponding x-value
-      local_max_y <- local_max_y[-which.max(local_max_y)]
       local_max_x <- local_max_x[-which.max(local_max_y)]
+      local_max_y <- local_max_y[-which.max(local_max_y)]
       
     }
     
