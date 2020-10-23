@@ -5,14 +5,9 @@ abs_max_func_2 <- function(x, wave1, wave2) {
   x <- as.matrix(x)
   
   #Get rid of the coordinates from the data set
-  x <- x[,-c(1,2)]
+  x <- x[,-(1:2)]
   
-  #Subset the wavelengths as a vector by unlisting (Wavelengths are in the
-  #first row). Get rid of the names associated with each vector element.
-  #Since we are subsetting the wavelengths, we need to get rid of the first
-  #row in the big dataset
-  #Note -c(1,2) will get rid of the first two elements because they are 
-  #NA
+  #Subset the wavelengths as a vector
   dataset_wavelengths <- unlist(x[1,], use.names = FALSE)
   x <- x[-1,]
   
