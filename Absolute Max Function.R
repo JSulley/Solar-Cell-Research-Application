@@ -4,13 +4,8 @@ abs_max_func <- function(x) {
   #Convert to matrix
   x <- as.matrix(x)
   
-  #Subset the wavelengths as a vector by unlisting (Wavelengths are in the
-  #first row). Get rid of the names associated with each vector element.
-  #Since we are subsetting the wavelengths, we need to get rid of the first
-  #row in the big dataset
-  #Note c(-1,-2) will get rid of the first two elements because they are 
-  #NA
-  dataset_wavelengths <- unlist(x[1,-c(1,2)], use.names = FALSE)
+  #Subset the wavelengths as a vector
+  dataset_wavelengths <- unlist(x[1,-(1:2)], use.names = FALSE)
   x <- x[-1,]
   
   #Determine x values of endpoints
@@ -19,7 +14,7 @@ abs_max_func <- function(x) {
   #Get the coordinates from the data set and omit the first two columns from data frame
   x_coordinate <- unlist(x[,1], use.names = FALSE)
   y_coordinate <- unlist(x[,2], use.names = FALSE)
-  x <- x[,-c(1,2)]
+  x <- x[,-(1:2)]
   
   #Make a list for the x,y coordinate and the wavelength
   wavelength_list <- list()
