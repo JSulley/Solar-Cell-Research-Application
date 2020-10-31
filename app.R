@@ -31,6 +31,10 @@ sidebar <- dashboardSidebar(
         fileInput("file", h3("File Upload", align = "center"), accept = c('text/csv', 'text/comma-separated-values,text/plain', '.csv')),
         hr(),
         
+        #Create select box for file format options
+        selectInput("select", label = h3("Plot Download Format"), choices = list("SVG" = 1, "JPEG" = 2, "PNG" = 3), selected = 1),
+        hr(),
+        
         #Dynamic portion
         #Make two boxes that accept numeric entries for two wavelength values
         h3("Wavelength Input", align = "center"),
@@ -88,22 +92,28 @@ body <- dashboardBody(
                                     p("2. The first two columns are the x and y coordinates."),
                                     p("3. Nothing in the first two boxes."),
                                     p("4. The rest are the intensities."),
-                                    strong(em("Example:")),
+                                    strong("Example:"),
                                     br(),
                                     
                                     #Image demonstrating format of CSV file
                                     img(src = "Example Data.PNG", height = 200, width = 350),
+                                    hr(),
+                                    
+                                    #Make note of program being able to accept TSV files
+                                    p(strong("Update:"), "The program now accepts files that are in TSV format (tab-separated values). It assumes the same structure.")
                            ),
                            
                            #Note regarding downloading plots.
                            tabPanel("Downloading Plots/Tables",
                                     p("You are able to download the plots/tables displayed!"),
-                                    p("The plots are downloaded in SVG format, while the tables are downloaded as a CSV file."),
+                                    p("The plots are downloaded in SVG format, while the tables are downloaded in CSV format."),
                                     p("For Table 2 to appear, you", strong("must"), "input two different wavelengths first."),
+                                    hr(), 
                                     
                                     #Note what calculation is being done for relative intensity
-                                    p(strong(em("Note:")), "For the relative intensity, it is the ratio of", HTML(paste0("&lambda;",tags$sub(1))) ,"intensity to",
-                                      HTML(paste0("&lambda;",tags$sub(2))) ,"intensity")),
+                                    p(strong("Note:"), "For the relative intensity, it is the ratio of", HTML(paste0("&lambda;",tags$sub(1))) ,"intensity to",
+                                      HTML(paste0("&lambda;",tags$sub(2))) ,"intensity"),
+                                    p(strong("Update:"), "The plots can now be downloaded in JPEG and PNG format. Under the \"Plot Download Format\" section, click on the box and select the format you want!")),
                            
                            #Note recent features
                            tabPanel("More Features",
@@ -273,6 +283,7 @@ body <- dashboardBody(
                            #Create a checkbox for Local Peak wavelength histogram
                            checkboxInput("localpeakcheck", label = "Display Histogram?", value = TRUE)
                 )),
+                
                 hr(),
                 
                 #Download button for histogram
@@ -307,6 +318,7 @@ body <- dashboardBody(
                            checkboxInput("localmaxcheck", label = "Display Histogram?", value = TRUE)),
         
                 ),
+                
                 hr(),
                 
                 #Download button for Absolute/local max histogram
@@ -510,6 +522,7 @@ server <- function(input, output, session) {
         
     })
     
+    
     df_peakWave <- reactive({
     
         test <- dataset()
@@ -708,6 +721,7 @@ server <- function(input, output, session) {
     
     
     ###REACTIVE VALUES FOR DOWNLOAD BUTTONS###
+    #Table 1
     df_csv_t1 <- reactive({
         
         test <- dataset()
@@ -716,6 +730,7 @@ server <- function(input, output, session) {
         
     })
     
+    #Table 2
     df_csv_t2 <- reactive({
         
         test <- bigger_data()[,-(1:5)]
@@ -733,8 +748,25 @@ server <- function(input, output, session) {
         #Allow user to make file name
         filename = function(){
             
-            #Name file
-            paste0("Normal Max Intensity Plot", ".svg")
+            #SVG is selected
+            if (input$select == 1) {
+                
+                #Name file
+                paste0("Normal Max Intensity Plot", ".svg")
+                
+            #JPEG is selected
+            } else if (input$select == 2) {
+                
+                #Name file
+                paste0("Normal Max Intensity Plot", ".jpeg")
+                
+            #PNG is selected   
+            } else if (input$select == 3) {
+                
+                #Name file
+                paste0("Normal Max Intensity Plot", ".png")
+                
+            }
             
         },
         
@@ -745,12 +777,30 @@ server <- function(input, output, session) {
             p <- ggplot(df_absInt(), aes(X, Y, fill= Normal_Intensity)) + 
                 geom_tile() + theme_ipsum() + xlab("X") + ylab("Y") + labs(fill = "Normal Intensity")+ggtitle("Normal Max Intensity Plot")+ scale_fill_gradient(low = "black", high = "red")
             
-            #Make svg
-            svg(file)
+            #SVG is selected
+            if (input$select == 1) {
+                
+                #Make file SVG
+                svg(file)
+            
+            #JPEG is selected
+            } else if (input$select == 2) {
+                
+                #Make file JPEG
+                jpeg(file)
+             
+            #PNG is selected   
+            } else if (input$select == 3) {
+                
+                #Make file PNG
+                png(file)
+                
+            }
             
             print(p)
             
-            dev.off()    
+            dev.off()
+                
         }
         
     )
@@ -761,8 +811,25 @@ server <- function(input, output, session) {
         #Allow user to make file name
         filename = function(){
             
-            #Name file
-            paste0("Peak Wavelength Plot", ".svg")
+            #SVG is selected
+            if (input$select == 1) {
+                
+                #Name file
+                paste0("Peak Wavelength Plot", ".svg")
+                
+            #JPEG is selected
+            } else if (input$select == 2) {
+                
+                #Name file
+                paste0("Peak Wavelength Plot", ".jpeg")
+                
+            #PNG is selected   
+            } else if (input$select == 3) {
+                
+                #Name file
+                paste0("Peak Wavelength Plot", ".png")
+                
+            }
             
         },
         
@@ -773,8 +840,25 @@ server <- function(input, output, session) {
             p <- ggplot(df_peakWave(), aes(X, Y, fill= Wavelength)) + 
                 geom_tile() + theme_ipsum() + xlab("X") + ylab("Y") + labs(fill = "Wavelength")+ggtitle("Peak Wavelength Plot")+ scale_fill_gradient(low = "black", high = "red")
             
-            #Make svg
-            svg(file)
+            #SVG is selected
+            if (input$select == 1) {
+                
+                #Make file SVG
+                svg(file)
+                
+            #JPEG is selected
+            } else if (input$select == 2) {
+                
+                #Make file JPEG
+                jpeg(file)
+                
+            #PNG is selected   
+            } else if (input$select == 3) {
+                
+                #Make file PNG
+                png(file)
+                
+            }
             
             print(p)
             
@@ -789,8 +873,25 @@ server <- function(input, output, session) {
         #Allow user to make file name
         filename = function(){
             
-            #Name file
-            paste0("Relative Intensity Plot", ".svg")
+            #SVG is selected
+            if (input$select == 1) {
+                
+                #Name file
+                paste0("Relative Intensity Plot", ".svg")
+                
+            #JPEG is selected
+            } else if (input$select == 2) {
+                
+                #Name file
+                paste0("Relative Intensity Plot", ".jpeg")
+                
+            #PNG is selected   
+            } else if (input$select == 3) {
+                
+                #Name file
+                paste0("Relative Intensity Plot", ".png")
+                
+            }
             
         },
         
@@ -801,8 +902,25 @@ server <- function(input, output, session) {
             p <- ggplot(df_relInt(), aes(X, Y, fill= Relative_Intensity)) + 
                 geom_tile() + theme_ipsum() + xlab("X") + ylab("Y") + labs(fill = "Rel. Intensity") + ggtitle("Relative Intensity Plot")+ scale_fill_gradient(low = "black", high = "red")
             
-            #Make svg
-            svg(file)
+            #SVG is selected
+            if (input$select == 1) {
+                
+                #Make file SVG
+                svg(file)
+                
+            #JPEG is selected
+            } else if (input$select == 2) {
+                
+                #Make file JPEG
+                jpeg(file)
+                
+            #PNG is selected   
+            } else if (input$select == 3) {
+                
+                #Make file PNG
+                png(file)
+                
+            }
             
             print(p)
             
@@ -817,8 +935,25 @@ server <- function(input, output, session) {
         #Allow user to make file name
         filename = function(){
             
-            #Name file
-            paste0("Wavelength 1 Intensity Plot", ".svg")
+            #SVG is selected
+            if (input$select == 1) {
+                
+                #Name file
+                paste0("Wavelength 1 Intensity Plot", ".svg")
+                
+            #JPEG is selected
+            } else if (input$select == 2) {
+                
+                #Name file
+                paste0("Wavelength 1 Intensity Plot", ".jpeg")
+                
+            #PNG is selected   
+            } else if (input$select == 3) {
+                
+                #Name file
+                paste0("Wavelength 1 Intensity Plot", ".png")
+                
+            }
             
         },
         
@@ -829,8 +964,25 @@ server <- function(input, output, session) {
             p <- ggplot(df_wave1(), aes(X, Y, fill= Normal_Wave_1_Intensity)) + 
                 geom_tile() + theme_ipsum() + xlab("X") + ylab("Y") + labs(fill = "Intensity")+ggtitle("Wavelength 1 Intensity Plot") + scale_fill_gradient(low = "black", high = "red")
             
-            #Make svg
-            svg(file)
+            #SVG is selected
+            if (input$select == 1) {
+                
+                #Make file SVG
+                svg(file)
+                
+            #JPEG is selected
+            } else if (input$select == 2) {
+                
+                #Make file JPEG
+                jpeg(file)
+                
+            #PNG is selected   
+            } else if (input$select == 3) {
+                
+                #Make file PNG
+                png(file)
+                
+            }
             
             print(p)
             
@@ -845,8 +997,25 @@ server <- function(input, output, session) {
         #Allow user to make file name
         filename = function(){
             
-            #Name file
-            paste0("Wavelength 2 Intensity Plot", ".svg")
+            #SVG is selected
+            if (input$select == 1) {
+                
+                #Name file
+                paste0("Wavelength 2 Intensity Plot", ".svg")
+                
+            #JPEG is selected
+            } else if (input$select == 2) {
+                
+                #Name file
+                paste0("Wavelength 2 Intensity Plot", ".jpeg")
+                
+            #PNG is selected   
+            } else if (input$select == 3) {
+                
+                #Name file
+                paste0("Wavelength 2 Intensity Plot", ".png")
+                
+            }
             
         },
         
@@ -857,8 +1026,25 @@ server <- function(input, output, session) {
             p <- ggplot(df_wave2(), aes(X, Y, fill= Normal_Wave_2_Intensity)) + 
                 geom_tile() + theme_ipsum() + xlab("X") + ylab("Y") + labs(fill = "Intensity")+ggtitle("Wavelength 2 Intensity Plot") + scale_fill_gradient(low = "black", high = "red")
             
-            #Make svg
-            svg(file)
+            #SVG is selected
+            if (input$select == 1) {
+                
+                #Make file SVG
+                svg(file)
+                
+            #JPEG is selected
+            } else if (input$select == 2) {
+                
+                #Make file JPEG
+                jpeg(file)
+                
+            #PNG is selected   
+            } else if (input$select == 3) {
+                
+                #Make file PNG
+                png(file)
+                
+            }
             
             print(p)
             
@@ -909,14 +1095,31 @@ server <- function(input, output, session) {
         
     )
     
-    #Download button for Peak Wavelength histogram
+    #Download button for Peak/Local Peak Wavelength histogram
     output$downloadHist <- downloadHandler(
         
         #Allow user to make file name
         filename = function() {
             
-            #Name of file
-            paste0("Peak Wavelength Histogram", ".svg")
+            #SVG is selected
+            if (input$select == 1) {
+                
+                #Name file
+                paste0("Peak Wavelength Histogram", ".svg")
+                
+            #JPEG is selected
+            } else if (input$select == 2) {
+                
+                #Name file
+                paste0("Peak Wavelength Histogram", ".jpeg")
+                
+            #PNG is selected   
+            } else if (input$select == 3) {
+                
+                #Name file
+                paste0("Peak Wavelength Histogram", ".png")
+                
+            }
             
         },
         
@@ -932,17 +1135,32 @@ server <- function(input, output, session) {
             #Calculate break points based on lowest & highest local peak wavelength values along with number of bins
             bins1 <- seq(min(w),max(w), length.out = input$inslider1 + 1)
             
-            #Make svg
-            svg(file)
+            #SVG is selected
+            if (input$select == 1) {
+                
+                #Make file SVG
+                svg(file)
+                
+            #JPEG is selected
+            } else if (input$select == 2) {
+                
+                #Make file JPEG
+                jpeg(file)
+                
+            #PNG is selected   
+            } else if (input$select == 3) {
+                
+                #Make file PNG
+                png(file)
+                
+            }
             
             #If user checks both boxes, then display both histograms
             if (input$peakcheck & input$localpeakcheck) {
                 
-                
                 #Display both histograms
                 hist(dataset()[,3], breaks = bins, main = "Histogram of Peak/Local Peak Wavelengths", xlab = "Wavelength", col = "blue", border = "white", xlim = c(min(c(dataset()[,3],w)) - 10, max(c(dataset()[,3],w)) + 10))
                 hist(w, breaks = bins1, col = rgb(0,1,0,0.5), border = "white", add = TRUE)
-                
                 
             } else if (input$peakcheck) {
                 
@@ -967,8 +1185,25 @@ server <- function(input, output, session) {
         #Allow user to make a file name
         filename = function() {
             
-            #Name of file
-            paste0("Absolute and Local Max Histogram", ".svg")
+            #SVG is selected
+            if (input$select == 1) {
+                
+                #Name file
+                paste0("Absolute and Local Max Histogram", ".svg")
+                
+            #JPEG is selected
+            } else if (input$select == 2) {
+                
+                #Name file
+                paste0("Absolute and Local Max Histogram", ".jpeg")
+                
+            #PNG is selected   
+            } else if (input$select == 3) {
+                
+                #Name file
+                paste0("Absolute and Local Max Histogram", ".png")
+                
+            }
             
         },
         
@@ -984,7 +1219,25 @@ server <- function(input, output, session) {
             #Calculate break points based on lowest & highest local max values along with number of bins
             bins1 <- seq(min(w), max(w), length.out = input$inslider3 + 1)
             
-            svg(file)
+            #SVG is selected
+            if (input$select == 1) {
+                
+                #Make file SVG
+                svg(file)
+                
+            #JPEG is selected
+            } else if (input$select == 2) {
+                
+                #Make file JPEG
+                jpeg(file)
+                
+            #PNG is selected   
+            } else if (input$select == 3) {
+                
+                #Make file PNG
+                png(file)
+                
+            }
             
             #If user checks both boxes, then display both histograms
             if (input$absmaxcheck & input$localmaxcheck) {
@@ -1015,16 +1268,50 @@ server <- function(input, output, session) {
         #Create file name
         filename = function() {
             
-            #Name of file
-            paste0("Spectrum Plot", ".svg")
+            #SVG is selected
+            if (input$select == 1) {
+                
+                #Name file
+                paste0("Spectrum Plot", ".svg")
+                
+            #JPEG is selected
+            } else if (input$select == 2) {
+                
+                #Name file
+                paste0("Spectrum Plot", ".jpeg")
+                
+            #PNG is selected   
+            } else if (input$select == 3) {
+                
+                #Name file
+                paste0("Spectrum Plot", ".png")
+                
+            }
             
         },
         
         #Content for file
         content = function(file) {
             
-            #Make svg
-            svg(file)
+            #SVG is selected
+            if (input$select == 1) {
+                
+                #Make file SVG
+                svg(file)
+                
+            #JPEG is selected
+            } else if (input$select == 2) {
+                
+                #Make file JPEG
+                jpeg(file)
+                
+            #PNG is selected   
+            } else if (input$select == 3) {
+                
+                #Make file PNG
+                png(file)
+                
+            }
             
             #Plot points for given row on graph
             plot(wavelengths(), y_values(), xlab = "Wavelength", ylab = "Normal Intensity", main = paste("Normal Intensity vs. Wavelength \n X =", coordinates()[1],", Y = ", coordinates()[2]))
@@ -1223,6 +1510,7 @@ server <- function(input, output, session) {
                 
             }
             
+            
         }
         
     })
@@ -1363,7 +1651,6 @@ server <- function(input, output, session) {
         
         #Print local max/min points
         brushedPoints(data.frame(Wavelength, Normal_Intensity), input$smoothPlot_brush, xvar = "Wavelength", yvar = "Normal_Intensity")
-        
     })
     
     
