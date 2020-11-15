@@ -29,6 +29,7 @@ sidebar <- dashboardSidebar(
         
         #File Upload button
         fileInput("file", h3("File Upload", align = "center"), accept = c('text/csv', 'text/comma-separated-values,text/plain', '.csv')),
+        radioButtons("sep", h3("Separator"), choices = c(Tab = "\t", Comma = ","), selected = "\t"),
         hr(),
         
         #Create select box for file format options
@@ -57,7 +58,7 @@ sidebar <- dashboardSidebar(
         
         
         #Create remaining menu items 
-        menuItem("Dataset Plots", tabName = "datasetDash"),
+        menuItem("Dataset Heatmaps", tabName = "datasetDash"),
         menuItem("Relative/Wavelength Intensity Plots", tabName = "relativeDash"),
         menuItem("Dataset Tables", tabName = "tables"),
         menuItem("Dataset Histograms", tabName = "datasethistograms"),
@@ -100,7 +101,9 @@ body <- dashboardBody(
                                     hr(),
                                     
                                     #Make note of program being able to accept TSV files
-                                    p(strong("Update:"), "The program now accepts files that are in TSV format (tab-separated values). It assumes the same structure.")
+                                    p(strong("Update:"), "The program now accepts files that are in TSV format (tab-separated values). It assumes the same structure."),
+                                    p("You can now choose what the separator is before uploading a file! Underneath the file upload widget, just choose either tab or comma.")
+                                    
                            ),
                            
                            #Note regarding downloading plots.
@@ -137,7 +140,7 @@ body <- dashboardBody(
                                     img(src = "Example Row Number.png", height = 200, width = 350),
                                     p("The row number is 1, which would then be inputted in the box labeled 'Smooth Spline Interpolation Display Input'. Now, press 'Go!' and click on the 'Export AllSpectra' tab to see the graph!"),
                                     hr(),
-                           
+                                    
                                     #Interactive Smooth Spline
                                     h3("Interactive Smoothing Spline"),
                                     p("The smoothing spline plot is now interactive! You can click and drag over a portion of the plot, and the program will display what is inside the region with the window margins specified."),
@@ -151,17 +154,34 @@ body <- dashboardBody(
                                     h3("Absolute/Local Max Interactive Histograms"),
                                     p("These histograms display the distribution of the absolute max values and local max values."),
                                     p("This interactive plot shares the same features as the other one: one or both histograms can be seen, each histogram has its own slider, class width (which is unitless) is displayed for each one, and the information underneath is presented based on which histogram(s) is selected."),
-                                    img(src = "Absolute and Local Max Hist.PNG", height = 520, width = 900))
+                                    img(src = "Absolute and Local Max Hist.PNG", height = 520, width = 900),
+                                    hr(),
+                           
+                                    #Histogram main and axes title
+                                    h3("Histogram Label Control"),
+                                    p("The main and axes titles of any histogram can now be renamed! In the text input boxes, just enter the name for one, two or all labels and press \"Show Plot With Title Edits\" to see a preview before downloading."),
+                                    p("Note: The button does not need to be pressed first in order for the changes to appear on the download."),
+                                    img(src = "Title Example.PNG", height = 520, width = 900),
+                                    hr(),
+                                    
+                                    #Title option for heatmaps
+                                    h3("Dataset Heatmaps: Titles Now Optional"),
+                                    p("The title for both dataset heatmaps is optional when downloaded."),
+                                    p("Simply leave the box unchecked if the title should be omitted. Otherwise, go ahead and check it out!"),
+                                    img(src = "HeatMap Title Box.PNG")
+                                    )
+                                
                     )   
                     
                 )
         ),
         
-        #Content for "Dataset Plots"
+        #Content for "Dataset Heatmaps"
         tabItem(tabName = "datasetDash",
                 
                 #Download button for Normalized Absolute Max Intensity Heat Map
                 downloadButton("downloadgraph", "Download Normal Max Intensity Plot"),
+                checkboxInput("checkTitle", "Include Title In Download", value = FALSE),
                 
                 #Output heat map for Normalized Absolute Max Intensity and Information
                 plotOutput("normMaxIntHeatMap", click = "click") %>% withSpinner(getOption("spinner.type", 8)),
@@ -172,6 +192,7 @@ body <- dashboardBody(
                 
                 #Make download button for Peak Wavelength Heat Map
                 downloadButton("downloadgraph1", "Download Peak Wavelength Plot"),
+                checkboxInput("checkTitle1", "Include Title In Download", value = FALSE),
                 
                 #Output heat map for Peak Wavelength and Information
                 plotOutput("peakWaveHeatMap", click = "click") %>% withSpinner(getOption("spinner.type", 8)),
@@ -274,17 +295,44 @@ body <- dashboardBody(
                            
                            #Create slider for Local Peak Wavelength Histogram
                            uiOutput("slider1"),
-                           textOutput("classwidth1"),
-                           
-                           ),
+                           textOutput("classwidth1")),
                     
                     column(1,
                            
                            #Create a checkbox for Local Peak wavelength histogram
-                           checkboxInput("localpeakcheck", label = "Display Histogram?", value = TRUE)
-                )),
+                           checkboxInput("localpeakcheck", label = "Display Histogram?", value = TRUE)),
+                    
+                    column(3,
+                           
+                           #Create slider for the horizontal axis range of the Peak/Local Peak Histogram
+                           uiOutput("sliderx")
+                           
+                    )),
                 
                 hr(),
+                
+                #Create row for text input
+                fluidRow(
+                    column(3,
+                           
+                           #Text input: Histogram Title
+                           textInput("textInp", "Histogram Title", "Peak/Local Peak Wavelength Histogram")),
+                    
+                    column(3,
+                           
+                           #Text input: Horizontal Axis Title
+                           textInput("textInp1", "Horizontal Axis Title", "Wavelength")),
+                    
+                    column(3,
+                           
+                           #Text input: Vertical axis Title
+                           textInput("textInp2", "Vertical Axis Title", "Frequency")),
+                    
+                    column(1,
+                           
+                           #Action button: Apply changes
+                           actionButton('applyChange', "Show Plot With Title Edits"))),
+                
                 
                 #Download button for histogram
                 downloadButton("downloadHist","Download Histogram Plot"),
@@ -316,10 +364,38 @@ body <- dashboardBody(
                            
                            #Create a checkbox for Peak wavelength Histogram)
                            checkboxInput("localmaxcheck", label = "Display Histogram?", value = TRUE)),
-        
-                ),
+                    
+                    column(3,
+                           
+                           #Create slider for the horizontal axis range of the Absolute/Local Max Histogram
+                           uiOutput("sliderx1")
+                    
+                )),
                 
                 hr(),
+                
+                #Create row for text input
+                fluidRow(
+                    column(3,
+                           
+                           #Text input: Histogram Title
+                           textInput("textInp3", "Histogram Title", "Absolute/Max Values Histogram")),
+                    
+                    column(3,
+                           
+                           #Text input: Horizontal Axis Title
+                           textInput("textInp4", "Horizontal Axis Title", "Value")),
+                    
+                    column(3,
+                           
+                           #Text input: Vertical axis Title
+                           textInput("textInp5", "Vertical Axis Title", "Frequency")),
+                    
+                    column(1,
+                           
+                           #Action button: Apply changes
+                           actionButton('applyChange1', "Show Plot With Title Edits"))),
+            
                 
                 #Download button for Absolute/local max histogram
                 downloadButton("downloadHist1","Download Histogram Plot"),
@@ -374,15 +450,16 @@ server <- function(input, output, session) {
     
     
     ###PREPARATION###
+    
     #Read uploaded file
     first_df <- reactive({
+        
         req(input$file)
         
-        #Test for a text file
-        if (grepl("\\.txt", input$file$datapath)) {read_tsv(input$file$datapath, col_names = FALSE)}
-        else {read_csv(input$file$datapath, col_names = FALSE)}
-        
-        })
+        #Use the uploaded file and selected separator to build tibble
+        read_delim(input$file$datapath, delim = input$sep, col_names = FALSE)
+
+    })
     
     #Use abs_max_func (Absolute Max Function.R) for data frame
     dataset <- eventReactive(input$file$datapath,{
@@ -402,6 +479,51 @@ server <- function(input, output, session) {
     
     #Window margins for zoomsmooth plot
     window_margins <- reactiveValues(x = NULL, y = NULL)
+    
+    
+    ###OBJECTS FOR HISTOGRAMS###
+    
+    #Create local peak wavelength vector
+    localPeakWave <- reactive({
+        
+        unlist(local_max_list()[1:(length(local_max_list())/2)], use.names = FALSE)
+        
+    })
+    
+    #Calculate break points based on lowest & highest peak wavelength values along with number of bins 
+    binsPeakWave <- reactive({
+        
+        seq(min(dataset()[,3]),max(dataset()[,3]), length.out = input$inslider + 1)
+    
+    })
+    
+    #Calculate break points based on lowest & highest local peak wavelength values along with number of bins
+    binsLocWave <- reactive({
+        
+        seq(min(localPeakWave()),max(localPeakWave()), length.out = input$inslider1 + 1)
+    
+    })
+    
+    #Create local max vector 
+    localMax <- reactive({
+        
+        unlist(local_max_list()[(length(local_max_list())/2 + 1):length(local_max_list())], use.names = FALSE)
+    
+    })
+    
+    #Calculate break points
+    binsAbsMax <- reactive({
+        
+        seq(min(dataset()[,5]),max(dataset()[,5]), length.out = input$inslider2 + 1)
+    
+    })
+    
+    #Calculate break points
+    binsLocMax <- reactive({
+        
+        seq(min(localMax()),max(localMax()), length.out = input$inslider3 + 1)
+        
+    })
     
     
     ###ACTION BUTTONS###
@@ -472,6 +594,37 @@ server <- function(input, output, session) {
     
     ###SLIDER INPUT###
     
+    #Slider for horizontal range of Peak/Local Peak Wavelength Histogram
+    output$sliderx <- renderUI({
+        
+        #Calculate min and max values for each histogram. Then use the floor function on the minimums and ceiling function on maximums for integers
+        min_both <- floor(min(c(dataset()[,3], localPeakWave())))
+        max_both <- ceiling(max(c(dataset()[,3], localPeakWave())))
+        min_peak <- floor(min(dataset()[,3]))
+        max_peak <- ceiling(max(dataset()[,3]))
+        min_local <- floor(min(localPeakWave()))
+        max_local <- ceiling(max(localPeakWave()))
+        
+        #If user checks both boxes, then display both histograms
+        if (input$peakcheck & input$localpeakcheck) {
+            
+            #Create slider based on both histograms
+            sliderInput("insliderx", "Horizontal Axis Range", min = min_both, max = max_both, value = c(min_both, max_both), step = (max_both - min_both)/(max(length(dataset()[,3]), length(localPeakWave()))-1))
+            
+        } else if (input$peakcheck) {
+            
+            #Create slider based on the peak wavelength histogram 
+            sliderInput("insliderx", "Horizontal Axis Range", min = min_peak, max = max_peak, value = c(min_peak, max_peak), step = (max_peak - min_peak)/(length(dataset()[,3])-1))
+            
+        } else if (input$localpeakcheck) {
+            
+            #Create slider based on the local peak wavelength histogram
+            sliderInput("insliderx", "Horizontal Axis Range", min = min_local, max = max_local, value = c(min_local, max_local), step = (max_local - min_local)/(length(localPeakWave())-1))
+            
+        }
+        
+    })
+    
     #Slider for Peak Wavelength Histogram 
     output$slider <- renderUI({
         
@@ -489,6 +642,37 @@ server <- function(input, output, session) {
         #Lowest number is 1; highest number is how many coordinates there are in the uploaded dataset
         #Default value is 2
         sliderInput("inslider1", "Local Peak Wavelength (Green)", min = 1, max = length(unlist(local_max_list()[1:(length(local_max_list())/2)], use.names = FALSE)), value = 2, step = 1)
+        
+    })
+    
+    #Slider for horizontal range of Absolute/Local Max Histogram
+    output$sliderx1 <- renderUI({
+        
+        #Calculate min and max values for each histogram. Then use the floor function on the minimums and ceiling function on maximums for integers
+        min_both <- floor(min(c(dataset()[,5], localMax())))
+        max_both <- ceiling(max(c(dataset()[,5],localMax())))
+        min_abs <- floor(min(dataset()[,5]))
+        max_abs <- ceiling(max(dataset()[,5]))
+        min_local <- floor(min(localMax()))
+        max_local <- ceiling(max(localMax()))
+        
+        #If user checks both boxes, then display both histograms
+        if (input$absmaxcheck & input$localmaxcheck) {
+            
+            #Create slider based on both histograms
+            sliderInput("insliderx1", "Horizontal Axis Range", min = min_both, max = max_both, value = c(min_both,max_both), step = (max_both - min_both)/(max(length(dataset()[,5]), length(localMax()))-1))
+            
+        } else if (input$absmaxcheck) {
+            
+            #Create slider based on the absolute max histogram 
+            sliderInput("insliderx1", "Horizontal Axis Range", min = min_abs, max = max_abs, value = c(min_abs, max_abs), step = (max_abs - min_abs)/(length(dataset()[,5])-1))
+            
+        } else if (input$localmaxcheck) {
+            
+            #Create slider based on the local peak wavelength histogram
+            sliderInput("insliderx1", "Horizontal Axis Range", min = min_local, max = max_local, value = c(min_local, max_local), step = (max_local - min_local)/(length(localMax())-1))
+            
+        }
         
     })
     
@@ -513,7 +697,8 @@ server <- function(input, output, session) {
     })
     
     
-    ###REACTIVE VALUES FOR HEAT MAP PLOTS/DOWNLOAD BUTTONS###
+    ###REACTIVE DATA FRAME VALUES FOR HEAT MAP PLOTS/DOWNLOAD BUTTONS###
+    
     df_absInt <- reactive({
         
         test <- dataset()
@@ -522,13 +707,12 @@ server <- function(input, output, session) {
         
     })
     
-    
     df_peakWave <- reactive({
-    
+        
         test <- dataset()
         colnames(test) <- c("X","Y","Wavelength","Intensity", "Normal Intensity")
         test
-    
+        
     })
     
     df_relInt <- reactive({
@@ -556,129 +740,181 @@ server <- function(input, output, session) {
     })
     
     
+    ###FUNCTIONS: HEAT MAPS### 
+    
+    #Normal Intensity Heat Map
+    normMaxIntPlot <- function() {
+        
+        #Make ggplot2 static plot
+        ggplot(df_absInt(), aes(X, Y, fill= Normal_Intensity)) + 
+            geom_tile() + theme_ipsum() + xlab("X") + ylab("Y") + labs(fill = "Normal Intensity") + scale_fill_gradient(low = "black", high = "red")
+        
+    }
+    
+    #Peak Wavelength Heat Map
+    peakWavePlot <- function() {
+        
+        #Make ggplot2 static plot
+        ggplot(df_peakWave(), aes(X, Y, fill= Wavelength)) + 
+            geom_tile() + theme_ipsum() + xlab("X") + ylab("Y") + labs(fill = "Wavelength") + scale_fill_gradient(low = "black", high = "red")
+        
+    }
+    
+    #Relative Intensity Heat Map
+    relIntPlot <- function(){
+        
+        #Make ggplot2 static plot
+        ggplot(df_relInt(), aes(X, Y, fill= Relative_Intensity)) + 
+            geom_tile() + theme_ipsum() + xlab("X") + ylab("Y") + labs(fill = "Rel. Intensity") + ggtitle(paste("Relative Intensity", paste0("(",input$wavelength1, "/", input$wavelength2,")"),"Plot"))+ scale_fill_gradient(low = "black", high = "red")
+        
+    }
+    
+    #Wavelength 1 Normal Intensity Heat Map 
+    wave1IntPlot <- function() {
+        
+        #Make ggplot2 static plot
+        ggplot(df_wave1(), aes(X, Y, fill= Normal_Wave_1_Intensity)) + 
+            geom_tile() + theme_ipsum() + xlab("X") + ylab("Y") + labs(fill = "Normal Intensity") + ggtitle(paste("Wavelength 1",paste0("(",input$wavelength1,")"),"Intensity Plot")) + scale_fill_gradient(low = "black", high = "red")
+        
+    }
+    
+    #Wavelength 2 Normal Intensity Heat Map
+    wave2IntPlot <- function() {
+        
+        #Make ggplot2 static plot
+        ggplot(df_wave2(), aes(X, Y, fill= Normal_Wave_2_Intensity)) + 
+            geom_tile() + theme_ipsum() + xlab("X") + ylab("Y") + labs(fill = "Normal Intensity") + ggtitle(paste("Wavelength 2",paste0("(",input$wavelength2,")"),"Intensity Plot")) + scale_fill_gradient(low = "black", high = "red")
+        
+    }
+    
+    
     ###HEAT MAP PLOTS###
     
     #Normalized Absolute Max Intensity Heat Map
     output$normMaxIntHeatMap <- renderPlot({
-
-        #Make ggplot2 static plot using dataset_2()
-        ggplot(df_absInt(), aes(X, Y, fill= Normal_Intensity)) + 
-            geom_tile() + theme_ipsum() + xlab("X") + ylab("Y") + labs(fill = "Normal Intensity")+ggtitle("Normal Max Intensity Plot")+ scale_fill_gradient(low = "black", high = "red")
         
+        #Generate graph
+        normMaxIntPlot() + ggtitle("Normal Max Intensity Plot") 
         
     })
     
     #Peak Wavelength Heat Map 
     output$peakWaveHeatMap <- renderPlot({
         
-        #Make ggplot2 static plot
-        ggplot(df_peakWave(), aes(X, Y, fill= Wavelength)) + 
-            geom_tile() + theme_ipsum() + xlab("X") + ylab("Y") + labs(fill = "Wavelength")+ggtitle("Peak Wavelength Plot")+ scale_fill_gradient(low = "black", high = "red")
-   
-     })
+        #Generate graph with title
+        peakWavePlot() + ggtitle("Peak Wavelength Plot")
+        
+    })
     
     #Relative Intensity Heat Map
     output$RelIntHeatMap <- renderPlot({
         
-        #Make ggplot2 static plot
-        ggplot(df_relInt(), aes(X, Y, fill= Relative_Intensity)) + 
-            geom_tile() + theme_ipsum() + xlab("X") + ylab("Y") + labs(fill = "Rel. Intensity") + ggtitle(paste("Relative Intensity", paste0("(",input$wavelength1, "/", input$wavelength2,")"),"Plot"))+ scale_fill_gradient(low = "black", high = "red")
+        #Generate graph with title
+        relIntPlot()
         
     })
     
     #Intensities for wavelength 1
     output$Wave1IntenHeatMap <- renderPlot({
         
-        #Make ggplot2 static plot
-        ggplot(df_wave1(), aes(X, Y, fill= Normal_Wave_1_Intensity)) + 
-            geom_tile() + theme_ipsum() + xlab("X") + ylab("Y") + labs(fill = "Normal Intensity") + ggtitle(paste("Wavelength 1",paste0("(",input$wavelength1,")"),"Intensity Plot")) + scale_fill_gradient(low = "black", high = "red")
-    
+        #Generate graph
+        wave1IntPlot()
+        
     })
     
     #Intensities for wavelength 2
     output$Wave2IntenHeatMap <- renderPlot({
         
-        #Make ggplot2 static plot
-        ggplot(df_wave2(), aes(X, Y, fill= Normal_Wave_2_Intensity)) + 
-            geom_tile() + theme_ipsum() + xlab("X") + ylab("Y") + labs(fill = "Normal Intensity") + ggtitle(paste("Wavelength 2",paste0("(",input$wavelength2,")"),"Intensity Plot")) + scale_fill_gradient(low = "black", high = "red")
+        #Generate graph
+        wave2IntPlot()
         
     })
     
     
-    ###PEAK WAVELENGTH HISTOGRAM###
+    ###FUNCTIONS: HISTOGRAMS###
     
-    #Make histogram representing the distribution of the peak wavelengths 
-    output$peakhist <- renderPlot({
-        
-        #Assign local peak wavelength vector
-        w <- unlist(local_max_list()[1:(length(local_max_list())/2)], use.names = FALSE)
-        
-        #Calculate break points based on lowest & highest peak wavelength values along with number of bins 
-        bins <- seq(min(dataset()[,3]),max(dataset()[,3]), length.out = input$inslider + 1)
-        
-        #Calculate break points based on lowest & highest local peak wavelength values along with number of bins
-        bins1 <- seq(min(w),max(w), length.out = input$inslider1 + 1)
+    #Peak/Local Peak Wavelength Histogram
+    peakLocWavePlot <- function() {
         
         #If user checks both boxes, then display both histograms
         if (input$peakcheck & input$localpeakcheck) {
             
-            
             #Display both histograms
-            hist(dataset()[,3], breaks = bins, main = "Histogram of Peak/Local Peak Wavelengths", xlab = "Wavelength", col = "blue", border = "white", xlim = c(min(c(dataset()[,3],w)) - 10, max(c(dataset()[,3],w)) + 10))
-            hist(w, breaks = bins1, col = rgb(0,1,0,0.5), border = "white", add = TRUE)
+            hist(dataset()[,3], breaks = binsPeakWave(), main = NULL, xlab = NULL, ylab = NULL, col = "blue", border = "white", xlim = c(input$insliderx[1] - 10, input$insliderx[2] + 10))
+            hist(localPeakWave(), breaks = binsLocWave(), col = rgb(0,1,0,0.5), border = "white", add = TRUE)
             
-        
         } else if (input$peakcheck) {
             
             #If user checks box for peak wavelength histogram only, then display it
-            hist(dataset()[,3], breaks = bins, main = "Histogram of Peak Wavelengths", xlab = "Wavelength", col = "blue", border = "white", xlim = c(min(dataset()[,3]) - 10, max(dataset()[,3]) + 10))
+            hist(dataset()[,3], breaks = binsPeakWave(), main = NULL, xlab = NULL, ylab = NULL, col = "blue", border = "white", xlim = c(input$insliderx[1] - 10, input$insliderx[2] + 10))
             
         } else if (input$localpeakcheck) {
             
             #If user checks box for local peak wavelength histogram only, then display it
-            hist(w, breaks = bins1, main = "Histogram of Local Peak Wavelengths", xlab = "Wavelength", col = rgb(0,1,0,0.5), border = "white", xlim = c(min(w) - 10, max(w) + 10))
+            hist(localPeakWave(), breaks = binsLocWave(), main = NULL, xlab = NULL, ylab = NULL, col = rgb(0,1,0,0.5), border = "white", xlim = c(input$insliderx[1] - 10, input$insliderx[2] + 10))
             
         }
+        
+        
+    }
+    
+    #Absolute and Local Max Histogram
+    absLocMaxPlot <- function() {
+        
+        #If user checks both boxes, then display both histograms
+        if (input$absmaxcheck & input$localmaxcheck) {
+            
+            hist(dataset()[,5], breaks = binsAbsMax(), main = NULL, xlab = NULL, ylab = NULL, col = "blue", border = "white", xlim = c(input$insliderx1[1] - 0.1, input$insliderx1[2] + 0.1))
+            hist(localMax(), breaks = binsLocMax(), col = rgb(0,1,0,0.5), border = "white", add = TRUE)
+            
+        } else if (input$absmaxcheck) {
+            
+            #If user checks box for absolute max histogram only, then display it
+            hist(dataset()[,5], breaks = binsAbsMax(), main = NULL, xlab = NULL, ylab = NULL, col = "blue", border = "white", xlim = c(input$insliderx1[1] - 0.1, input$insliderx1[2] + 0.1))
+            
+        } else if (input$localmaxcheck) {
+            
+            #If user checks box for local max histogram only, then display it
+            hist(localMax(), breaks = binsLocMax(), main = NULL, xlab = NULL, ylab = NULL, col = rgb(0,1,0,0.5), border = "white", xlim = c(input$insliderx1[1] - 0.1, input$insliderx1[2] + 0.1))
+            
+        }
+        
+    }
+    
+    
+    ###DATASET HISTOGRAMS###
+    
+    #Make histogram representing the distribution of the peak wavelengths 
+    output$peakhist <- renderPlot({
+        
+        #Generate histogram
+        peakLocWavePlot()
+        
+        
+        #When action button is pressed, apply changes
+        input$applyChange
+        isolate({title(main = input$textInp, xlab = input$textInp1, ylab = input$textInp2)})
+        
     })
     
     #Make histogram representing the distribution of the absolute/local max values
     output$abslochist <- renderPlot({
         
-        #Assign local max value vector
-        w <- unlist(local_max_list()[(length(local_max_list())/2+1): length(local_max_list())], use.names = FALSE)
+        #Generate Graph
+        absLocMaxPlot()
         
-        #Calculate break points based on lowest & highest absolute max values along with number of bins
-        bins <- seq(min(dataset()[,5]), max(dataset()[,5]), length.out = input$inslider2 + 1)
-        
-        #Calculate break points based on lowest & highest local max values along with number of bins
-        bins1 <- seq(min(w), max(w), length.out = input$inslider3 + 1)
-        
-        #If user checks both boxes, then display both histograms
-        if (input$absmaxcheck & input$localmaxcheck) {
-            
-            hist(dataset()[,5], breaks = bins, main = "Histogram of Absolute/Local Max Values", xlab = "Value", col = "blue", border = "white", xlim = c(min(c(dataset()[,5],w)) - 0.1, max(c(dataset()[,5],w)) + 0.1))
-            hist(w, breaks = bins1, col = rgb(0,1,0,0.5), border = "white", add = TRUE)
-            
-        } else if (input$absmaxcheck) {
-            
-            #If user checks box for absolute max histogram only, then display it
-            hist(dataset()[,5], breaks = bins, main = "Histogram of Absolute Max Values", xlab = "Value", col = "blue", border = "white", xlim = c(min(dataset()[,5]) - 0.1, max(dataset()[,5]) + 0.1))
-            
-        } else if (input$localmaxcheck) {
-            
-            #If user checks box for local max histogram only, then display it
-            hist(w, breaks = bins1, main = "Histogram of Local Max Values", xlab = "Value", col = rgb(0,1,0,0.5), border = "white", xlim = c(min(w) - 0.1, max(w) + 0.1))
-            
-        }
+        #When action button is pressed, Apply changes
+        input$applyChange1
+        isolate({title(main = input$textInp3, xlab = input$textInp4, ylab = input$textInp5)})
         
     })
     
     
-    ###SMOOTH SPLINE INTERPOLATION GRAPH###
-    
-    #Create smoothing spline line and plot it
-    output$smoothLine <- renderPlot({
-         
+    ###FUNCTIONS: SMOOTH SPLINE###
+
+    #Smooth Spline for specific row
+    smoothSplPlot <- function() {
+        
         #Plot points for given row on graph
         plot(wavelengths(), y_values(), xlab = "Wavelength", ylab = "Normal Intensity", main = paste("Normal Intensity vs. Wavelength \n X =", coordinates()[1],", Y = ", coordinates()[2]))
         
@@ -687,6 +923,17 @@ server <- function(input, output, session) {
         points(abs_max_coordinates()[1], abs_max_coordinates()[2], pch = 20, col = "blue", cex = 3)
         points(local_max_points()[1,],local_max_points()[2,], pch = 20, col = "green", cex = 3)
         legend("topright", c("Smoothing Spline","Absolute Max", "Local Max"),  lwd = c(2,NA,NA), col = c("red", "blue","green"), pch = c(NA,20,20), pt.cex = c(NA,3,3))
+        
+    }
+    
+    
+    ###SMOOTH SPLINE INTERPOLATION GRAPHS###
+    
+    #Create smoothing spline line and plot it
+    output$smoothLine <- renderPlot({
+        
+        #Generate graph
+        smoothSplPlot()
         
     })
     
@@ -718,9 +965,10 @@ server <- function(input, output, session) {
         }
         
     })
-    
+
     
     ###REACTIVE VALUES FOR DOWNLOAD BUTTONS###
+    
     #Table 1
     df_csv_t1 <- reactive({
         
@@ -739,14 +987,14 @@ server <- function(input, output, session) {
         
     })
     
-        
+    
     ###DOWNLOAD BUTTONS###
     
     #Download button for heat map of normalized max intensity
     output$downloadgraph <- downloadHandler(
         
         #Allow user to make file name
-        filename = function(){
+        filename = function() {
             
             #SVG is selected
             if (input$select == 1) {
@@ -773,22 +1021,18 @@ server <- function(input, output, session) {
         #Content for file
         content = function(file){
             
-            #Make ggplot2 static plot
-            p <- ggplot(df_absInt(), aes(X, Y, fill= Normal_Intensity)) + 
-                geom_tile() + theme_ipsum() + xlab("X") + ylab("Y") + labs(fill = "Normal Intensity")+ggtitle("Normal Max Intensity Plot")+ scale_fill_gradient(low = "black", high = "red")
-            
             #SVG is selected
             if (input$select == 1) {
                 
                 #Make file SVG
                 svg(file)
-            
+                
             #JPEG is selected
             } else if (input$select == 2) {
                 
                 #Make file JPEG
-                jpeg(file)
-             
+                jpeg(file, quality = 100)
+                
             #PNG is selected   
             } else if (input$select == 3) {
                 
@@ -797,10 +1041,12 @@ server <- function(input, output, session) {
                 
             }
             
-            print(p)
+            #Show graph
+            if(!input$checkTitle) {print(normMaxIntPlot())}
+            else {print(normMaxIntPlot() + ggtitle("Normal Max Intensity Plot"))}
             
             dev.off()
-                
+            
         }
         
     )
@@ -836,10 +1082,6 @@ server <- function(input, output, session) {
         #Content for file
         content = function(file){
             
-            #Make ggplot2 static plot
-            p <- ggplot(df_peakWave(), aes(X, Y, fill= Wavelength)) + 
-                geom_tile() + theme_ipsum() + xlab("X") + ylab("Y") + labs(fill = "Wavelength")+ggtitle("Peak Wavelength Plot")+ scale_fill_gradient(low = "black", high = "red")
-            
             #SVG is selected
             if (input$select == 1) {
                 
@@ -850,7 +1092,7 @@ server <- function(input, output, session) {
             } else if (input$select == 2) {
                 
                 #Make file JPEG
-                jpeg(file)
+                jpeg(file, quality = 100)
                 
             #PNG is selected   
             } else if (input$select == 3) {
@@ -860,8 +1102,8 @@ server <- function(input, output, session) {
                 
             }
             
-            print(p)
-            
+            if(!input$checkTitle1) {print(peakWavePlot())}
+            else {print(peakWavePlot() + ggtitle("Peak Wavelength Plot"))}
             dev.off()    
         }
         
@@ -897,11 +1139,7 @@ server <- function(input, output, session) {
         
         #Content for file
         content = function(file){
-            
-            #Make ggplot2 static plot
-            p <- ggplot(df_relInt(), aes(X, Y, fill= Relative_Intensity)) + 
-                geom_tile() + theme_ipsum() + xlab("X") + ylab("Y") + labs(fill = "Rel. Intensity") + ggtitle("Relative Intensity Plot")+ scale_fill_gradient(low = "black", high = "red")
-            
+           
             #SVG is selected
             if (input$select == 1) {
                 
@@ -912,7 +1150,7 @@ server <- function(input, output, session) {
             } else if (input$select == 2) {
                 
                 #Make file JPEG
-                jpeg(file)
+                jpeg(file, quality = 100)
                 
             #PNG is selected   
             } else if (input$select == 3) {
@@ -922,7 +1160,7 @@ server <- function(input, output, session) {
                 
             }
             
-            print(p)
+            print(relIntPlot())
             
             dev.off()    
         }
@@ -960,10 +1198,6 @@ server <- function(input, output, session) {
         #Content for file
         content = function(file){
             
-            #Make ggplot2 static plot
-            p <- ggplot(df_wave1(), aes(X, Y, fill= Normal_Wave_1_Intensity)) + 
-                geom_tile() + theme_ipsum() + xlab("X") + ylab("Y") + labs(fill = "Intensity")+ggtitle("Wavelength 1 Intensity Plot") + scale_fill_gradient(low = "black", high = "red")
-            
             #SVG is selected
             if (input$select == 1) {
                 
@@ -974,7 +1208,7 @@ server <- function(input, output, session) {
             } else if (input$select == 2) {
                 
                 #Make file JPEG
-                jpeg(file)
+                jpeg(file, quality = 100)
                 
             #PNG is selected   
             } else if (input$select == 3) {
@@ -984,7 +1218,7 @@ server <- function(input, output, session) {
                 
             }
             
-            print(p)
+            print(wave1IntPlot())
             
             dev.off()    
         }
@@ -1022,10 +1256,6 @@ server <- function(input, output, session) {
         #Content for file
         content = function(file){
             
-            #Make ggplot2 static plot
-            p <- ggplot(df_wave2(), aes(X, Y, fill= Normal_Wave_2_Intensity)) + 
-                geom_tile() + theme_ipsum() + xlab("X") + ylab("Y") + labs(fill = "Intensity")+ggtitle("Wavelength 2 Intensity Plot") + scale_fill_gradient(low = "black", high = "red")
-            
             #SVG is selected
             if (input$select == 1) {
                 
@@ -1036,7 +1266,7 @@ server <- function(input, output, session) {
             } else if (input$select == 2) {
                 
                 #Make file JPEG
-                jpeg(file)
+                jpeg(file, quality = 100)
                 
             #PNG is selected   
             } else if (input$select == 3) {
@@ -1046,7 +1276,7 @@ server <- function(input, output, session) {
                 
             }
             
-            print(p)
+            print(wave2IntPlot())
             
             dev.off()    
         }
@@ -1126,15 +1356,6 @@ server <- function(input, output, session) {
         #Content for file
         content = function(file){
             
-            #Assign local peak wavelength vector
-            w <- unlist(local_max_list()[1:(length(local_max_list())/2)], use.names = FALSE)
-            
-            #Calculate break points based on lowest & highest peak wavelength values along with number of bins 
-            bins <- seq(min(dataset()[,3]),max(dataset()[,3]), length.out = input$inslider + 1)
-            
-            #Calculate break points based on lowest & highest local peak wavelength values along with number of bins
-            bins1 <- seq(min(w),max(w), length.out = input$inslider1 + 1)
-            
             #SVG is selected
             if (input$select == 1) {
                 
@@ -1145,7 +1366,7 @@ server <- function(input, output, session) {
             } else if (input$select == 2) {
                 
                 #Make file JPEG
-                jpeg(file)
+                jpeg(file, quality = 100)
                 
             #PNG is selected   
             } else if (input$select == 3) {
@@ -1155,24 +1376,8 @@ server <- function(input, output, session) {
                 
             }
             
-            #If user checks both boxes, then display both histograms
-            if (input$peakcheck & input$localpeakcheck) {
-                
-                #Display both histograms
-                hist(dataset()[,3], breaks = bins, main = "Histogram of Peak/Local Peak Wavelengths", xlab = "Wavelength", col = "blue", border = "white", xlim = c(min(c(dataset()[,3],w)) - 10, max(c(dataset()[,3],w)) + 10))
-                hist(w, breaks = bins1, col = rgb(0,1,0,0.5), border = "white", add = TRUE)
-                
-            } else if (input$peakcheck) {
-                
-                #If user checks box for peak wavelength histogram only, then display it
-                hist(dataset()[,3], breaks = bins, main = "Histogram of Peak Wavelengths", xlab = "Wavelength", col = "blue", border = "white", xlim = c(min(dataset()[,3]) - 10, max(dataset()[,3]) + 10))
-                
-            } else if (input$localpeakcheck) {
-                
-                #If user checks box for local peak wavelength histogram only, then display it
-                hist(w, breaks = bins1, main = "Histogram of Local Peak Wavelengths", xlab = "Wavelength", col = rgb(0,1,0,0.5), border = "white", xlim = c(min(w) - 10, max(w) + 10))
-                
-            }
+            peakLocWavePlot()
+            title(main = input$textInp, xlab = input$textInp1, ylab = input$textInp2)
             
             dev.off()    
         }
@@ -1210,15 +1415,6 @@ server <- function(input, output, session) {
         #Content for file
         content = function(file) {
             
-            #Assign local max value vector
-            w <- unlist(local_max_list()[(length(local_max_list())/2+1): length(local_max_list())], use.names = FALSE)
-            
-            #Calculate break points based on lowest & highest absolute max values along with number of bins
-            bins <- seq(min(dataset()[,5]), max(dataset()[,5]), length.out = input$inslider2 + 1)
-            
-            #Calculate break points based on lowest & highest local max values along with number of bins
-            bins1 <- seq(min(w), max(w), length.out = input$inslider3 + 1)
-            
             #SVG is selected
             if (input$select == 1) {
                 
@@ -1229,7 +1425,7 @@ server <- function(input, output, session) {
             } else if (input$select == 2) {
                 
                 #Make file JPEG
-                jpeg(file)
+                jpeg(file, quality = 100)
                 
             #PNG is selected   
             } else if (input$select == 3) {
@@ -1239,23 +1435,8 @@ server <- function(input, output, session) {
                 
             }
             
-            #If user checks both boxes, then display both histograms
-            if (input$absmaxcheck & input$localmaxcheck) {
-                
-                hist(dataset()[,5], breaks = bins, main = "Histogram of Absolute/Local Max Values", xlab = "Value", col = "blue", border = "white", xlim = c(min(c(dataset()[,5],w)) - 0.1, max(c(dataset()[,5],w)) + 0.1))
-                hist(w, breaks = bins1, col = rgb(0,1,0,0.5), border = "white", add = TRUE)
-                
-            } else if (input$absmaxcheck) {
-                
-                #If user checks box for absolute max histogram only, then display it
-                hist(dataset()[,5], breaks = bins, main = "Histogram of Absolute Max Values", xlab = "Value", col = "blue", border = "white", xlim = c(min(dataset()[,5]) - 0.1, max(dataset()[,5]) + 0.1))
-                
-            } else if (input$localmaxcheck) {
-                
-                #If user checks box for local max histogram only, then display it
-                hist(w, breaks = bins1, main = "Histogram of Local Max Values", xlab = "Value", col = rgb(0,1,0,0.5), border = "white", xlim = c(min(w) - 0.1, max(w) + 0.1))
-                
-            }
+            absLocMaxPlot()
+            title(main = input$textInp3, xlab = input$textInp4, ylab = input$textInp5)
             
             dev.off()   
         }
@@ -1303,7 +1484,7 @@ server <- function(input, output, session) {
             } else if (input$select == 2) {
                 
                 #Make file JPEG
-                jpeg(file)
+                jpeg(file, quality = 100)
                 
             #PNG is selected   
             } else if (input$select == 3) {
@@ -1313,14 +1494,7 @@ server <- function(input, output, session) {
                 
             }
             
-            #Plot points for given row on graph
-            plot(wavelengths(), y_values(), xlab = "Wavelength", ylab = "Normal Intensity", main = paste("Normal Intensity vs. Wavelength \n X =", coordinates()[1],", Y = ", coordinates()[2]))
-            
-            #Plot smooth spline line, absolute max point, and local max points
-            lines(splinesmoothfit(), col = "red", lwd = 2)
-            points(abs_max_coordinates()[1], abs_max_coordinates()[2], pch = 20, col = "blue", cex = 3)
-            points(local_max_points()[1,],local_max_points()[2,], pch = 20, col = "green", cex = 3)
-            legend("topright", c("Smoothing Spline","Absolute Max", "Local Max"),  lwd = c(2,NA,NA), col = c("red", "blue","green"), pch = c(NA,20,20), pt.cex = c(NA,3,3))
+            print(smoothSplPlot())
             
             dev.off()    
         }
@@ -1329,6 +1503,7 @@ server <- function(input, output, session) {
     
     
     ###REACTIVE VALUES FOR INFO###
+    
     df_info12 <- reactive({
         
         test <- dataset()
@@ -1348,7 +1523,7 @@ server <- function(input, output, session) {
     
     ###OUTPUT INFORMATION###
     
-    #Output information for interactive Heat map (max int.)
+    #Output information for interactive Heat map (normal max int.)
     output$info1 <- renderPrint({
         
         #Display row information
@@ -1361,7 +1536,7 @@ server <- function(input, output, session) {
         
         #Display row information
         nearPoints(df_info12()[,-c(4,5)], input$click, threshold = 15, maxpoints = 1)
-    
+        
     })
     
     #Output information for interactive heat map (Relative Intensity)
@@ -1382,7 +1557,7 @@ server <- function(input, output, session) {
     
     #Output Information for interactive heat map (Wavelength 2)
     output$info5 <- renderPrint({
-    
+        
         #Display row information
         nearPoints(df_info345()[,-c(3:6,8:9)], input$click3, threshold = 15, maxpoints = 1)
         
@@ -1394,50 +1569,33 @@ server <- function(input, output, session) {
         #If no bin is clicked on
         if(is.null(input$click4$x)) return()
         
-        #Assign local peak wavelength vector
-        w <- unlist(local_max_list()[1:(length(local_max_list())/2)], use.names = FALSE)
-        
-        #Calculate break points
-        bins <- seq(min(dataset()[,3]),max(dataset()[,3]), length.out = input$inslider + 1)
-        
-        #Calculate break points
-        bins1 <- seq(min(w),max(w), length.out = input$inslider1 + 1)
-        
         #Create reactive value for current peak wavelength histogram
-        z <- reactive({
-            
-            hist(dataset()[,3], breaks = bins)
-            
-        })
+        z <- hist(dataset()[,3], breaks = binsPeakWave())
         
         #Create reactive value for current local peak wavelength histogram
-        y <- reactive({
-            
-            hist(w, breaks = bins1)
-            
-        })
+        y <- hist(localPeakWave(), breaks = binsLocWave())
         
         #Determine indices of limits where mouse is between (peak wavelength histogram)
-        lower_lim_ind_peak <- tail(which(z()$breaks <= input$click4$x),1)
-        higher_lim_ind_peak <- head(which(z()$breaks >= input$click4$x),1)
+        lower_lim_ind_peak <- tail(which(z$breaks <= input$click4$x),1)
+        higher_lim_ind_peak <- head(which(z$breaks >= input$click4$x),1)
         
         ##Determine indices of limits where mouse is between (local peak wavelength histogram)
-        lower_lim_ind_local <- tail(which(y()$breaks <= input$click4$x),1)
-        higher_lim_ind_local <- head(which(y()$breaks >= input$click4$x),1)
+        lower_lim_ind_local <- tail(which(y$breaks <= input$click4$x),1)
+        higher_lim_ind_local <- head(which(y$breaks >= input$click4$x),1)
         
         #Find the limits for each histogram
-        lower_lim_peak <- z()$breaks[lower_lim_ind_peak]
-        higher_lim_peak <- z()$breaks[higher_lim_ind_peak]
-        lower_lim_local <- y()$breaks[lower_lim_ind_local]
-        higher_lim_local <- y()$breaks[higher_lim_ind_local]
+        lower_lim_peak <- z$breaks[lower_lim_ind_peak]
+        higher_lim_peak <- z$breaks[higher_lim_ind_peak]
+        lower_lim_local <- y$breaks[lower_lim_ind_local]
+        higher_lim_local <- y$breaks[higher_lim_ind_local]
         
         #Determine the count
-        peak_count <- z()$counts[lower_lim_ind_peak]
-        local_count <- y()$counts[lower_lim_ind_local]
+        peak_count <- z$counts[lower_lim_ind_peak]
+        local_count <- y$counts[lower_lim_ind_local]
         
         #Create vectors for each histogram consisting of lower and upper limits, midpoint, and frequency
-        peak_info <- c(lower_lim_peak, higher_lim_peak, z()$mids[lower_lim_peak < z()$mids & z()$mids < higher_lim_peak], peak_count)
-        local_info <- c(lower_lim_local, higher_lim_local, y()$mids[lower_lim_local < y()$mids & y()$mids < higher_lim_local], local_count)
+        peak_info <- c(lower_lim_peak, higher_lim_peak, z$mids[lower_lim_peak < z$mids & z$mids < higher_lim_peak], peak_count)
+        local_info <- c(lower_lim_local, higher_lim_local, y$mids[lower_lim_local < y$mids & y$mids < higher_lim_local], local_count)
         
         #Create dataframe
         df <- cbind(peak_info, local_info)
@@ -1446,13 +1604,13 @@ server <- function(input, output, session) {
         if (input$peakcheck & input$localpeakcheck) {
             
             #If the user clicks within the range of either one or both histograms
-            if(input$click4$x < min(c(bins,bins1)) | input$click4$x > max(c(bins,bins1))) {
+            if(input$click4$x < min(c(binsPeakWave(),binsLocWave())) | input$click4$x > max(c(binsPeakWave(),binsLocWave()))) {
                 
                 #If user clicks out of the range for both histograms
                 print("Click on a bin that is within the range of either histogram.")
                 
                 
-            } else if (input$click4$x < min(bins) | input$click4$x > max(bins)) {
+            } else if (input$click4$x < min(binsPeakWave()) | input$click4$x > max(binsPeakWave())) {
                 
                 #If the user clicks on a green bin that is out of the range of the blue histogram
                 df[,1] <- NA * integer(nrow(df))
@@ -1460,7 +1618,7 @@ server <- function(input, output, session) {
                 rownames(df) <- c("Lower Bin Limit", "Higher Bin Limit", "Midpoint", "Frequency")
                 df
                 
-            } else if (input$click4$x < min(bins1) | input$click4$x > max(bins1)) {
+            } else if (input$click4$x < min(binsLocWave()) | input$click4$x > max(binsLocWave())) {
                 
                 #If the user clicks on a blue bin that is out of the range of the green histogram
                 df[,2] <- NA * integer(nrow(df))
@@ -1480,7 +1638,7 @@ server <- function(input, output, session) {
             
             #If user only checks box for peak wavelength histogram
             #If click is outside of range
-            if (input$click4$x < min(bins) | input$click4$x > max(bins)) {
+            if (input$click4$x < min(binsPeakWave()) | input$click4$x > max(binsPeakWave())) {
                 
                 print("Click on a bin within the range of the histogram")
                 
@@ -1497,7 +1655,7 @@ server <- function(input, output, session) {
             
             #If user only checks box for local peak wavelength histogram
             #If click is outside of range
-            if (input$click4$x < min(bins1) | input$click4$x > max(bins1)) {
+            if (input$click4$x < min(binsLocWave()) | input$click4$x > max(binsLocWave())) {
                 
                 print("Click on a bin within the range of the histogram")
                 
@@ -1521,51 +1679,33 @@ server <- function(input, output, session) {
         #If no bin is clicked on
         if(is.null(input$click5$x)) return()
         
-        #If a bin is clicked on
-        #Assign local max vector
-        w <- unlist(local_max_list()[(length(local_max_list())/2 + 1):length(local_max_list())], use.names = FALSE)
+        #Create reactive value for current absolute max histogram
+        z <- hist(dataset()[,5], breaks = binsAbsMax())
         
-        #Calculate break points
-        bins <- seq(min(dataset()[,5]),max(dataset()[,5]), length.out = input$inslider2 + 1)
-        
-        #Calculate break points
-        bins1 <- seq(min(w),max(w), length.out = input$inslider3 + 1)
-        
-        #Create reactive value for current peak wavelength histogram
-        z <- reactive({
-            
-            hist(dataset()[,5], breaks = bins)
-            
-        })
-        
-        #Create reactive value for current local peak wavelength histogram
-        y <- reactive({
-            
-            hist(w, breaks = bins1)
-            
-        })
+        #Create reactive value for current local max histogram
+        y <- hist(localMax(), breaks = binsLocMax())
         
         #Determine indices of limits where mouse is between (peak wavelength histogram)
-        lower_lim_ind_abs <- tail(which(z()$breaks <= input$click5$x),1)
-        higher_lim_ind_abs <- head(which(z()$breaks >= input$click5$x),1)
+        lower_lim_ind_abs <- tail(which(z$breaks <= input$click5$x),1)
+        higher_lim_ind_abs <- head(which(z$breaks >= input$click5$x),1)
         
         ##Determine indices of limits where mouse is between (local peak wavelength histogram)
-        lower_lim_ind_local <- tail(which(y()$breaks <= input$click5$x),1)
-        higher_lim_ind_local <- head(which(y()$breaks >= input$click5$x),1)
+        lower_lim_ind_local <- tail(which(y$breaks <= input$click5$x),1)
+        higher_lim_ind_local <- head(which(y$breaks >= input$click5$x),1)
         
         #Find the limits for each histogram
-        lower_lim_abs <- z()$breaks[lower_lim_ind_abs]
-        higher_lim_abs <- z()$breaks[higher_lim_ind_abs]
-        lower_lim_local <- y()$breaks[lower_lim_ind_local]
-        higher_lim_local <- y()$breaks[higher_lim_ind_local]
+        lower_lim_abs <- z$breaks[lower_lim_ind_abs]
+        higher_lim_abs <- z$breaks[higher_lim_ind_abs]
+        lower_lim_local <- y$breaks[lower_lim_ind_local]
+        higher_lim_local <- y$breaks[higher_lim_ind_local]
         
         #Determine the count for each bin that was clicked on using lower limit index
-        abs_count <- z()$counts[lower_lim_ind_abs]
-        local_count <- y()$counts[lower_lim_ind_local]
+        abs_count <- z$counts[lower_lim_ind_abs]
+        local_count <- y$counts[lower_lim_ind_local]
         
         #Create vectors for each histogram consisting of lower and upper limits, midpoint, and frequency
-        abs_info <- c(lower_lim_abs, higher_lim_abs, z()$mids[lower_lim_abs < z()$mids & z()$mids < higher_lim_abs], abs_count)
-        local_info <- c(lower_lim_local, higher_lim_local, y()$mids[lower_lim_local < y()$mids & y()$mids < higher_lim_local], local_count)
+        abs_info <- c(lower_lim_abs, higher_lim_abs, z$mids[lower_lim_abs < z$mids & z$mids < higher_lim_abs], abs_count)
+        local_info <- c(lower_lim_local, higher_lim_local, y$mids[lower_lim_local < y$mids & y$mids < higher_lim_local], local_count)
         
         #Create dataframe
         df <- cbind(abs_info, local_info)
@@ -1574,13 +1714,13 @@ server <- function(input, output, session) {
         if (input$absmaxcheck & input$localmaxcheck) {
             
             #If the user clicks within the range of either one or both histograms
-            if(input$click5$x < min(c(bins,bins1)) | input$click5$x > max(c(bins,bins1))) {
+            if(input$click5$x < min(c(binsAbsMax(),binsLocMax())) | input$click5$x > max(c(binsAbsMax(),binsLocMax()))) {
                 
                 #If user clicks out of the range for both histograms
                 print("Click on a bin that is within the range of either histogram.")
                 
                 
-            } else if (input$click5$x < min(bins) | input$click5$x > max(bins)) {
+            } else if (input$click5$x < min(binsAbsMax()) | input$click5$x > max(binsAbsMax())) {
                 
                 #If the user clicks on a green bin that is out of the range of the blue histogram
                 df[,1] <- NA * integer(nrow(df))
@@ -1588,7 +1728,7 @@ server <- function(input, output, session) {
                 rownames(df) <- c("Lower Bin Limit", "Higher Bin Limit", "Midpoint", "Frequency")
                 df
                 
-            } else if (input$click5$x < min(bins1) | input$click5$x > max(bins1)) {
+            } else if (input$click5$x < min(binsLocMax()) | input$click5$x > max(binsLocMax())) {
                 
                 #If the user clicks on a blue bin that is out of the range of the green histogram
                 df[,2] <- NA * integer(nrow(df))
@@ -1608,7 +1748,7 @@ server <- function(input, output, session) {
             
             #If user only checks box for absolute max histogram
             #If click is outside of range
-            if (input$click5$x < min(bins) | input$click5$x > max(bins)) {
+            if (input$click5$x < min(binsAbsMax()) | input$click5$x > max(binsAbsMax())) {
                 
                 print("Click on a bin within the range of the histogram")
                 
@@ -1625,7 +1765,7 @@ server <- function(input, output, session) {
             
             #If user only checks box for local max histogram
             #If click is outside of range
-            if (input$click5$x < min(bins1) | input$click5$x > max(bins1)) {
+            if (input$click5$x < min(binsLocMax()) | input$click5$x > max(binsLocMax())) {
                 
                 print("Click on a bin within the range of the histogram")
                 
@@ -1651,6 +1791,7 @@ server <- function(input, output, session) {
         
         #Print local max/min points
         brushedPoints(data.frame(Wavelength, Normal_Intensity), input$smoothPlot_brush, xvar = "Wavelength", yvar = "Normal_Intensity")
+        
     })
     
     
@@ -1659,58 +1800,38 @@ server <- function(input, output, session) {
     #Display class width for Peak Wavelength Histogram
     output$classwidth <- renderText({
         
-        #Use slider to determine the class width
-        #Calculate break points based on lowest & highest peak wavelength values along with number of bins 
-        bins <- seq(min(dataset()[,3]),max(dataset()[,3]), length.out = input$inslider + 1)
-        
         #Display Class Width
-        paste("Bin width is", (tail(bins,1) - head(bins,1))/(length(bins)-1), "nm")
+        paste("Bin width is", (max(binsPeakWave()) - min(binsPeakWave()))/(length(binsPeakWave())-1), "nm")
         
     })
     
     #Display class width for Local Peak Wavelength Histogram
     output$classwidth1 <- renderText({
         
-        #Assign local peak wavelength vector
-        w <- unlist(local_max_list()[1:(length(local_max_list())/2)], use.names = FALSE)
-        
-        #Use slider to determine the class width
-        #Calculate break points based on lowest & highest peak wavelength values along with number of bins 
-        bins <- seq(min(w),max(w), length.out = input$inslider1 + 1)
-        
         #Display Class Width
-        paste("Bin width is", (tail(bins,1) - head(bins,1))/(length(bins)-1), "nm")
+        paste("Bin width is", (max(binsLocWave()) - min(binsLocWave()))/(length(binsLocWave())-1), "nm")
         
     })
     
     #Display class width for Absolute Max Histogram
     output$classwidth2 <- renderText({
         
-        #Use slider to determine the class width
-        #Calculate break points based on lowest & highest peak wavelength values along with number of bins 
-        bins <- seq(min(dataset()[,5]),max(dataset()[,5]), length.out = input$inslider2 + 1)
-        
         #Display Class Width
-        paste("Bin width is", (tail(bins,1) - head(bins,1))/(length(bins)-1))
+        paste("Bin width is", (max(binsAbsMax()) - min(binsAbsMax()))/(length(binsAbsMax())-1))
         
     })
     
     #Display class width for Local Max Histogram
     output$classwidth3 <- renderText({
         
-        #Assign local max value vector
-        w <- unlist(local_max_list()[(length(local_max_list())/2+1): length(local_max_list())], use.names = FALSE)
-        
-        #Calculate break points based on lowest & highest local max values along with number of bins
-        bins <- seq(min(w), max(w), length.out = input$inslider3 + 1)
-        
         #Display Class Width
-        paste("Bin width is", (tail(bins,1) - head(bins,1))/(length(bins)-1))
+        paste("Bin width is", (max(binsLocMax()) - min(binsLocMax()))/(length(binsLocMax())-1))
         
     })
     
     
     ###REACTIVE VALUES FOR DATA TABLES###
+    
     df_t1 <- reactive({
         test <- dataset()
         colnames(test) <- c("X","Y",paste0("&lambda;",tags$sub("peak")),"Intensity", "Normal Intensity")
@@ -1736,7 +1857,7 @@ server <- function(input, output, session) {
         
     }, sanitize.text.function = function(x) x)
     
-
+    
     #Table 2 Output
     output$table1 <- renderTable({
         
