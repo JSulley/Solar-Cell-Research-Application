@@ -1,4 +1,4 @@
-#Load all needed packages and r scripts
+#Load needed packages and R scripts
 library(shiny)
 library(ggplot2)
 library(hrbrthemes)
@@ -28,20 +28,33 @@ sidebar <- dashboardSidebar(
         hr(),
         
         #File Upload button
-        fileInput("file", h3("File Upload", align = "center"), accept = c('text/csv', 'text/comma-separated-values,text/plain', '.csv')),
-        radioButtons("sep", h3("Separator"), choices = c(Tab = "\t", Comma = ","), selected = "\t"),
+        fileInput("file", 
+                  h3("File Upload", align = "center"), 
+                  accept = c('text/csv', 'text/comma-separated-values,text/plain', '.csv')),
+        
+        #Radio buttons
+        radioButtons("sep", h3("Separator"), 
+                     choices = c(Tab = "\t", Comma = ","), selected = "\t"),
         hr(),
         
         #Create select box for file format options
-        selectInput("select", label = h3("Plot Download Format"), choices = list("SVG" = 1, "JPEG" = 2, "PNG" = 3), selected = 1),
+        selectInput("select", label = h3("Plot Download Format"), 
+                    choices = list("SVG" = 1, "JPEG" = 2, "PNG" = 3), 
+                    selected = 1),
         hr(),
         
         #Dynamic portion
         #Make two boxes that accept numeric entries for two wavelength values
         h3("Wavelength Input", align = "center"),
         p('Input two distinct wavelengths', align = "center"),
-        numericInput('wavelength1', HTML(paste("Enter", paste0("&lambda;",tags$sub(1)))), value = NULL, min = 0),
-        numericInput('wavelength2', HTML(paste("Enter", paste0("&lambda;",tags$sub(2)))), value = NULL, min = 0),
+        
+        numericInput('wavelength1', 
+                     HTML(paste("Enter", paste0("&lambda;",tags$sub(1)))),
+                     value = NULL, min = 0),
+        
+        numericInput('wavelength2',
+                     HTML(paste("Enter", paste0("&lambda;",tags$sub(2)))),
+                     value = NULL, min = 0),
         
         #Create Action button for user
         actionButton("go","Go!"),
@@ -77,7 +90,7 @@ body <- dashboardBody(
         tabItem(tabName = "introduction",
                 
                 fluidPage(
-                    #Greet the user
+                    
                     h1("Welcome!"),
                     h2("Click on the any of the tabs for information you need to know!"),
                     
@@ -101,73 +114,107 @@ body <- dashboardBody(
                                     hr(),
                                     
                                     #Make note of program being able to accept TSV files
-                                    p(strong("Update:"), "The program now accepts files that are in TSV format (tab-separated values). It assumes the same structure."),
-                                    p("You can now choose what the separator is before uploading a file! Underneath the file upload widget, just choose either tab or comma.")
+                                    p(strong("Update:"), "The program now accepts files that are in TSV format (tab-
+                                      separated values). It assumes the same structure."),
+                                    p("You can now choose what the separator is before uploading a file! Underneath
+                                      the file upload widget, just choose either tab or comma.")
                                     
                            ),
                            
                            #Note regarding downloading plots.
                            tabPanel("Downloading Plots/Tables",
+                                    
                                     p("You are able to download the plots/tables displayed!"),
-                                    p("The plots are downloaded in SVG format, while the tables are downloaded in CSV format."),
-                                    p("For Table 2 to appear, you", strong("must"), "input two different wavelengths first."),
+                                    p("The plots are downloaded in SVG format, while the tables are downloaded in
+                                      CSV format."),
+                                    p("For Table 2 to appear, you", strong("must"), 
+                                    "input two different wavelengths first."),
                                     hr(), 
                                     
                                     #Note what calculation is being done for relative intensity
-                                    p(strong("Note:"), "For the relative intensity, it is the ratio of", HTML(paste0("&lambda;",tags$sub(1))) ,"intensity to",
+                                    p(strong("Note:"), "For the relative intensity, it is the ratio of",
+                                      HTML(paste0("&lambda;",tags$sub(1))) ,"intensity to",
                                       HTML(paste0("&lambda;",tags$sub(2))) ,"intensity"),
-                                    p(strong("Update:"), "The plots can now be downloaded in JPEG and PNG format. Under the \"Plot Download Format\" section, click on the box and select the format you want!")),
+                                    
+                                    p(strong("Update:"), "The plots can now be downloaded in JPEG and PNG format.
+                                      Under the \"Plot Download Format\" section, click on the box and 
+                                      select the format you want!")),
                            
                            #Note recent features
                            tabPanel("More Features",
                                     
                                     #Interactive Peak Wavelength Histogram
                                     h3("Peak/Local Peak Wavelength Interactive Histograms"),
-                                    p("The distribution of the peak wavelengths can be now viewed in the tab labeled 'Dataset Histograms'. Make sure to upload the file first!"),
-                                    p(strong("Update:"), "The Peak Wavelength Interactive Histogram now consists of the Local Peak Wavelength Histogram . You can select to display one histogram or both."),
-                                    p("There is also a separate slider for the Local Peak Wavelength Histogram and is labeled accordingly. When both histograms are present, available information is based on where you choose to click at."),
-                                    p("When one histogram is displayed, only information for that histogram will be displayed. Give it a try!"),
-                                    p("Class width for each histogram is underneath the slider. The units are in nanometers."),
+                                    p("The distribution of the peak wavelengths can be now viewed in the tab labeled
+                                      'Dataset Histograms'. Make sure to upload the file first!"),
+                                    p(strong("Update:"), "The Peak Wavelength Interactive Histogram now consists of
+                                      the Local Peak Wavelength Histogram. You can select to display one 
+                                      histogram or both."),
+                                    p("There is also a separate slider for the Local Peak Wavelength Histogram and
+                                      is labeled accordingly. When both histograms are present, available information
+                                      is based on where you choose to click at."),
+                                    p("When one histogram is displayed, only information for that histogram will be
+                                      displayed. Give it a try!"),
+                                    p("Class width for each histogram is underneath the slider.
+                                      The units are in nanometers."),
                                     img(src = "Peak and Local Peak Hist.PNG", height = 520, width = 900),
                                     hr(),
                                     
                                     #Smoothing Spline Interpolation Output
                                     h3("Smoothing Spline View"),
-                                    p("Now for any coordinate, the scatterplot of the normal intensities with the smoothing spline line graphed can be viewed!"),
+                                    p("Now for any coordinate, the scatterplot of the normal intensities with the
+                                      smoothing spline line graphed can be viewed!"),
                                     p("Just simply enter the row number, and the program will generate the plot."),
-                                    p("Where is the row number? To view it, click on the tile of interest. Then the first number to the left is it."),
+                                    p("Where is the row number? To view it, click on the tile of interest.
+                                      Then the first number to the left is it."),
                                     p("Here is an example:"),
                                     img(src = "Example Row Number.png", height = 200, width = 350),
-                                    p("The row number is 1, which would then be inputted in the box labeled 'Smooth Spline Interpolation Display Input'. Now, press 'Go!' and click on the 'Export AllSpectra' tab to see the graph!"),
+                                    p("The row number is 1, which would then be inputted in the box labeled 'Smooth
+                                      Spline Interpolation Display Input'. Now press 'Go!' and click on the 'Export
+                                      AllSpectra' tab to see the graph!"),
                                     hr(),
                                     
                                     #Interactive Smooth Spline
                                     h3("Interactive Smoothing Spline"),
-                                    p("The smoothing spline plot is now interactive! You can click and drag over a portion of the plot, and the program will display what is inside the region with the window margins specified."),
-                                    p("In other words, you can zoom into the plot with the result presented underneath it."),
-                                    p("Additionally, the region specified can be moved around by clicking and holding the specified region and placing it over a different area."),
-                                    p("The local extrema for the smoothing spline plot are now displayed. When the selected region covers any of these points, the program displays their values."),
+                                    p("The smoothing spline plot is now interactive! You can click and drag over a
+                                      portion of the plot, and the program will display what is inside the region with
+                                      the window margins specified."),
+                                    p("In other words, you can zoom into the plot with the 
+                                      result presented underneath it."),
+                                    p("Additionally, the region specified can be moved around by clicking and
+                                      holding the specified region and placing it over a different area."),
+                                    p("The local extrema for the smoothing spline plot are now displayed. When the
+                                      selected region covers any of these points, the program displays
+                                      their values."),
                                     p("Here is an example:"),
                                     img(src = "Zoom Spline.PNG", height = 520, width = 870),
                                     hr(),
                                     
                                     h3("Absolute/Local Max Interactive Histograms"),
-                                    p("These histograms display the distribution of the absolute max values and local max values."),
-                                    p("This interactive plot shares the same features as the other one: one or both histograms can be seen, each histogram has its own slider, class width (which is unitless) is displayed for each one, and the information underneath is presented based on which histogram(s) is selected."),
+                                    p("These histograms display the distribution of the absolute max values and
+                                      local max values."),
+                                    p("This interactive plot shares the same features as the other one: one or both
+                                      histograms can be seen, each histogram has its own slider, class width (which is
+                                      unitless) is displayed for each one, and the information underneath is presented
+                                      based on which histogram(s) is selected."),
                                     img(src = "Absolute and Local Max Hist.PNG", height = 520, width = 900),
                                     hr(),
                            
                                     #Histogram main and axes title
                                     h3("Histogram Label Control"),
-                                    p("The main and axes titles of any histogram can now be renamed! In the text input boxes, just enter the name for one, two or all labels and press \"Show Plot With Title Edits\" to see a preview before downloading."),
-                                    p("Note: The button does not need to be pressed first in order for the changes to appear on the download."),
+                                    p("The main and axes titles of any histogram can now be renamed! In the text
+                                      input boxes, just enter the name for one, two or all labels and press \"Show
+                                      Plot With Title Edits\" to see a preview before downloading."),
+                                    p("Note: The button does not need to be pressed first in order for the changes
+                                      to appear on the download."),
                                     img(src = "Title Example.PNG", height = 520, width = 900),
                                     hr(),
                                     
                                     #Title option for heatmaps
                                     h3("Dataset Heatmaps: Titles Now Optional"),
                                     p("The title for both dataset heatmaps is optional when downloaded."),
-                                    p("Simply leave the box unchecked if the title should be omitted. Otherwise, go ahead and check it out!"),
+                                    p("Simply leave the box unchecked if the title should be omitted. Otherwise,
+                                      go ahead and check it out!"),
                                     img(src = "HeatMap Title Box.PNG")
                                     )
                                 
@@ -184,7 +231,8 @@ body <- dashboardBody(
                 checkboxInput("checkTitle", "Include Title In Download", value = FALSE),
                 
                 #Output heat map for Normalized Absolute Max Intensity and Information
-                plotOutput("normMaxIntHeatMap", click = "click") %>% withSpinner(getOption("spinner.type", 8)),
+                plotOutput("normMaxIntHeatMap", click = "click") %>%
+                    withSpinner(getOption("spinner.type", 8)),
                 verbatimTextOutput("info1"),
                 
                 #Add border
@@ -195,7 +243,8 @@ body <- dashboardBody(
                 checkboxInput("checkTitle1", "Include Title In Download", value = FALSE),
                 
                 #Output heat map for Peak Wavelength and Information
-                plotOutput("peakWaveHeatMap", click = "click") %>% withSpinner(getOption("spinner.type", 8)),
+                plotOutput("peakWaveHeatMap", click = "click") %>%
+                    withSpinner(getOption("spinner.type", 8)),
                 verbatimTextOutput("info2")),
         
         #Content for Relative/Wavelength Intensity Plots
@@ -204,8 +253,9 @@ body <- dashboardBody(
                 #Make fluid row for interactive relative intensity map 
                 fluidRow(
                     
-                    h3(strong(em("Note:")), "Did you change the inputs for one or both wavelengths, but the plot(s) look(s) the same/did not change?
-                   Make sure you pressed Go! after updating any wavelength values!", align = "center"),
+                    h3(strong(em("Note:")), "Did you change the inputs for one or both wavelengths,
+                    but the plot(s) look(s) the same/did not change? Make sure you press \"Go!\"
+                    after updating any wavelength values!", align = "center"),
                     
                     column(12,
                            
@@ -213,10 +263,11 @@ body <- dashboardBody(
                            downloadButton("downloadgraph2", "Download Relative Intensity Plot"),
                            
                            #Heat Map plot of Relative Intensity given two values
-                           plotOutput("RelIntHeatMap", click = "click1") %>% withSpinner(getOption("spinner.type", 8)),
+                           plotOutput("RelIntHeatMap", click = "click1") %>%
+                               withSpinner(getOption("spinner.type", 8)),
                            verbatimTextOutput("info3")
                            
-                    ),
+                        ),
                     
                     
                     #Make fluid row for interactive intensities for both inputted wavelengths
@@ -228,7 +279,8 @@ body <- dashboardBody(
                                downloadButton("downloadgraph3", "Download Wavelength 1 Intensity Plot"),
                                
                                #Heat map plot for intensities of wavelength 1
-                               plotOutput("Wave1IntenHeatMap", click = "click2") %>% withSpinner(getOption("spinner.type", 8)),
+                               plotOutput("Wave1IntenHeatMap", click = "click2") %>%
+                                   withSpinner(getOption("spinner.type", 8)),
                                verbatimTextOutput("info4"),
                         ),
                         
@@ -238,8 +290,11 @@ body <- dashboardBody(
                                downloadButton("downloadgraph4", "Download Wavelength 2 Intensity Plot"),
                                
                                #Heat map plot for intensities of wavelength 1
-                               plotOutput("Wave2IntenHeatMap", click = "click3") %>% withSpinner(getOption("spinner.type", 8)),
-                               verbatimTextOutput("info5"))
+                               plotOutput("Wave2IntenHeatMap", click = "click3") %>%
+                                   withSpinner(getOption("spinner.type", 8)),
+                               verbatimTextOutput("info5")
+                               
+                        )
                     ),
                 )
         ),
@@ -260,7 +315,9 @@ body <- dashboardBody(
                            downloadButton("downloadtable", "Download Table 1"),
                            
                            #Output table regarding the given data set
-                           tableOutput('table')),
+                           tableOutput('table')
+                           
+                           ),
                     
                     #Table consisting columns for the output values for given wavelength values
                     column(6,
@@ -272,7 +329,9 @@ body <- dashboardBody(
                            downloadButton("downloadtable1", "Download Table 2"),
                            
                            #Output table regarding inputted wavelengths
-                           tableOutput('table1')),
+                           tableOutput('table1')
+                           
+                           ),
                 )
         ),
         
@@ -280,27 +339,68 @@ body <- dashboardBody(
         tabItem(tabName = "datasethistograms",
                 
                 fluidRow(
+                    
+                    column(3,
+                           
+                           #Create numeric input for number of bins for Peak Wavelength/Absolute Max Histograms
+                           numericInput("numberOfBins", "Numeric Input: Number of Bins (Blue Histograms)",
+                                        value = 2, min = 1),
+                           
+                           ),
+                    
+                    column(1,
+                           
+                           #Enter button
+                           actionButton("go2", "Enter")
+                           
+                           ),
+                    
+                    column(3,
+                           
+                           #Create numeric input for number of bins for Local Peak Wavelength/Local Max Histograms
+                           numericInput("numberOfBins1", "Numeric Input: Number of Bins 
+                                        (Green Histograms)", value = 2, min = 1),
+                           
+                           ),
+                    
+                    column(1,
+                           
+                           #Enter button
+                           actionButton("go3", "Enter")
+                           
+                    )),
+                
+                fluidRow(
+                    
                     column(3,
                            
                            #Create slider for Peak Wavelength Histogram
                            uiOutput("slider"),
-                           textOutput("classwidth")),
+                           textOutput("classwidth")
+                           
+                           ),
                     
                     column(1,
                            
                            #Create a checkbox for Peak wavelength Histogram
-                           checkboxInput("peakcheck", label = "Display Histogram?", value = TRUE)),
+                           checkboxInput("peakcheck", label = "Display Histogram?", value = TRUE)
+                           
+                           ),
                     
                     column(3,
                            
                            #Create slider for Local Peak Wavelength Histogram
                            uiOutput("slider1"),
-                           textOutput("classwidth1")),
+                           textOutput("classwidth1")
+                           
+                           ),
                     
                     column(1,
                            
                            #Create a checkbox for Local Peak wavelength histogram
-                           checkboxInput("localpeakcheck", label = "Display Histogram?", value = TRUE)),
+                           checkboxInput("localpeakcheck", label = "Display Histogram?", value = TRUE)
+                           
+                           ),
                     
                     column(3,
                            
@@ -313,57 +413,76 @@ body <- dashboardBody(
                 
                 #Create row for text input
                 fluidRow(
+                    
                     column(3,
                            
                            #Text input: Histogram Title
-                           textInput("textInp", "Histogram Title", "Peak/Local Peak Wavelength Histogram")),
+                           textInput("textInp", "Histogram Title", "Peak/Local Peak Wavelength Histogram")
+                           
+                           ),
                     
                     column(3,
                            
                            #Text input: Horizontal Axis Title
-                           textInput("textInp1", "Horizontal Axis Title", "Wavelength")),
+                           textInput("textInp1", "Horizontal Axis Title", "Wavelength")
+                           
+                           ),
                     
                     column(3,
                            
                            #Text input: Vertical axis Title
-                           textInput("textInp2", "Vertical Axis Title", "Frequency")),
+                           textInput("textInp2", "Vertical Axis Title", "Frequency")
+                           
+                           ),
                     
                     column(1,
                            
                            #Action button: Apply changes
-                           actionButton('applyChange', "Show Plot With Title Edits"))),
+                           actionButton('applyChange', "Show Plot With Title Edits")
+                           
+                    )),
                 
                 
                 #Download button for histogram
                 downloadButton("downloadHist","Download Histogram Plot"),
                 
                 #Output Peak Wavelength Histogram and Information
-                plotOutput("peakhist", click = "click4") %>% withSpinner(getOption("spinner.type", 8)),
+                plotOutput("peakhist", click = "click4") %>%
+                    withSpinner(getOption("spinner.type", 8)),
                 verbatimTextOutput("info6"),
                 hr(),
                 
                 fluidRow(
+                    
                     column(3,
                            
                            #Create slider for Absolute Max Histogram
                            uiOutput("slider2"),
-                           textOutput("classwidth2")),
+                           textOutput("classwidth2")
+                           
+                           ),
                     
                     column(1,
                            
                            #Create a checkbox for Peak wavelength Histogram)
-                           checkboxInput("absmaxcheck", label = "Display Histogram?", value = TRUE)),
+                           checkboxInput("absmaxcheck", label = "Display Histogram?", value = TRUE)
+                           
+                           ),
                     
                     column(3,
                            
                            #Create slider for Local Max Histogram
                            uiOutput("slider3"),
-                           textOutput("classwidth3")),
+                           textOutput("classwidth3")
+                           
+                           ),
                     
                     column(1,
                            
                            #Create a checkbox for Peak wavelength Histogram)
-                           checkboxInput("localmaxcheck", label = "Display Histogram?", value = TRUE)),
+                           checkboxInput("localmaxcheck", label = "Display Histogram?", value = TRUE)
+                           
+                           ),
                     
                     column(3,
                            
@@ -376,32 +495,42 @@ body <- dashboardBody(
                 
                 #Create row for text input
                 fluidRow(
+                    
                     column(3,
                            
                            #Text input: Histogram Title
-                           textInput("textInp3", "Histogram Title", "Absolute/Max Values Histogram")),
+                           textInput("textInp3", "Histogram Title", "Absolute/Local Max Values Histogram")
+                           
+                           ),
                     
                     column(3,
                            
                            #Text input: Horizontal Axis Title
-                           textInput("textInp4", "Horizontal Axis Title", "Value")),
+                           textInput("textInp4", "Horizontal Axis Title", "Value")
+                           
+                           ),
                     
                     column(3,
                            
                            #Text input: Vertical axis Title
-                           textInput("textInp5", "Vertical Axis Title", "Frequency")),
+                           textInput("textInp5", "Vertical Axis Title", "Frequency")
+                           
+                           ),
                     
                     column(1,
                            
                            #Action button: Apply changes
-                           actionButton('applyChange1', "Show Plot With Title Edits"))),
+                           actionButton('applyChange1', "Show Plot With Title Edits")
+                           
+                )),
             
                 
                 #Download button for Absolute/local max histogram
                 downloadButton("downloadHist1","Download Histogram Plot"),
                 
                 #Create histogram for absolute/local max histograms and information
-                plotOutput("abslochist", click = "click5") %>% withSpinner(getOption("spinner.type", 8)),
+                plotOutput("abslochist", click = "click5") %>%
+                    withSpinner(getOption("spinner.type", 8)),
                 verbatimTextOutput("info7")
                 
                 
@@ -414,7 +543,8 @@ body <- dashboardBody(
                 downloadButton("downloadSpectrum", "Download Spectrum Plot"),
                 
                 #Output smoothing spline plot
-                plotOutput("smoothLine", brush = brushOpts("smoothPlot_brush",resetOnNew = TRUE)),
+                plotOutput("smoothLine", 
+                           brush = brushOpts("smoothPlot_brush",resetOnNew = TRUE)),
                 
                 #Output zoomed smoothing spline plot
                 plotOutput("zoomsmooth"),
@@ -424,13 +554,16 @@ body <- dashboardBody(
         
         #Content for "About" tab
         tabItem(tabName = "about",
-                
-                #Write about application
                 h1("About the Application"),
-                
-                h3("It imports a cathodoluminescence dataset, which is obtained from images of a photovoltaic cell. It can visualize the characterization of the luminescence of solar cells, distribution of the wavelengths associated with the luminescense, the relationship between both luminescence and the wavelengths and more."), 
+                h3("It imports a cathodoluminescence dataset, which is obtained from images of a
+                   photovoltaic cell. It can visualize the characterization of the luminescence of
+                   solar cells, distribution of the wavelengths associated with the luminescense,
+                   the relationship between both luminescence and the wavelengths and more."), 
                 h3("The application can also export the plots/tables."),
-                h3("It is a product of the collaboration between the Mathematics Department and the Engineering Techonology Department at Texas A&M University-Central Texas. It is meant to enhance the Engineering Technology Department's research about solar cells through statistics."),
+                h3("It is a product of the collaboration between the Mathematics Department and
+                   the Engineering Techonology Department at Texas A&M University-Central Texas. It
+                   is meant to enhance the Engineering Technology Department's research about solar
+                   cells through statistics."),
                 h3("The application is still updated from time to time.")
         )
     ))
@@ -537,7 +670,7 @@ server <- function(input, output, session) {
     })
     
     #Extract wavelengths from uploaded dataset
-    wavelengths <- eventReactive(input$go1, {
+    wavelengths <- eventReactive(input$file$datapath, {
         
         #Wavelengths is the first row, first two entries are empty
         unlist(first_df()[1,-c(1,2)], use.names = FALSE)
@@ -628,20 +761,24 @@ server <- function(input, output, session) {
     #Slider for Peak Wavelength Histogram 
     output$slider <- renderUI({
         
+        input$go2
+        
         #Indicate number of bins
         #Lowest number is 1; highest number is how many coordinates there are in the uploaded dataset
         #Default value is 2
-        sliderInput("inslider", "Peak Wavelength (Blue)", min = 1, max = length(dataset()[,3]), value = 2, step = 1)
+        sliderInput("inslider", "Peak Wavelength (Blue)", min = 1, max = length(dataset()[,3]), value = isolate(input$numberOfBins), step = 1)
         
     })
     
     #Slider for Local Peak Wavelength Histogram
     output$slider1 <- renderUI({
         
+        input$go3
+        
         #Indicate number of bins
         #Lowest number is 1; highest number is how many coordinates there are in the uploaded dataset
         #Default value is 2
-        sliderInput("inslider1", "Local Peak Wavelength (Green)", min = 1, max = length(unlist(local_max_list()[1:(length(local_max_list())/2)], use.names = FALSE)), value = 2, step = 1)
+        sliderInput("inslider1", "Local Peak Wavelength (Green)", min = 1, max = length(unlist(local_max_list()[1:(length(local_max_list())/2)], use.names = FALSE)), value = isolate(input$numberOfBins1), step = 1)
         
     })
     
@@ -679,20 +816,24 @@ server <- function(input, output, session) {
     #Slider for Absolute Max Histogram
     output$slider2 <- renderUI({
         
+        input$go2
+        
         #Indicate number of bins
         #Lowest number is 1; highest number is how many elements are in each vector
         #Default value is 2
-        sliderInput("inslider2", "Absolute Max (Blue)", min = 1, max = length(dataset()[,5]), value = 2, step = 1)
+        sliderInput("inslider2", "Absolute Max (Blue)", min = 1, max = length(dataset()[,5]), value = isolate(input$numberOfBins), step = 1)
         
     })
     
     #Slider for Local Max Histogram
     output$slider3 <- renderUI({
         
+        input$go3
+        
         #Indicate number of bins
         #Lowest number is 1; highest number is how many elements are in each vector
         #Default value is 2
-        sliderInput("inslider3", "Local Max (Green)", min = 1, max = length(unlist(local_max_list()[(length(local_max_list())/2+1):length(local_max_list())], use.names = FALSE)), value = 2, step = 1)
+        sliderInput("inslider3", "Local Max (Green)", min = 1, max = length(unlist(local_max_list()[(length(local_max_list())/2+1):length(local_max_list())], use.names = FALSE)), value = isolate(input$numberOfBins1), step = 1)
         
     })
     
@@ -840,18 +981,18 @@ server <- function(input, output, session) {
         if (input$peakcheck & input$localpeakcheck) {
             
             #Display both histograms
-            hist(dataset()[,3], breaks = binsPeakWave(), main = NULL, xlab = NULL, ylab = NULL, col = "blue", border = "white", xlim = c(input$insliderx[1] - 10, input$insliderx[2] + 10))
+            hist(dataset()[,3], breaks = binsPeakWave(), main = NULL, xlab = NULL, ylab = NULL, col = "blue", border = "white", xlim = c(input$insliderx[1], input$insliderx[2]))
             hist(localPeakWave(), breaks = binsLocWave(), col = rgb(0,1,0,0.5), border = "white", add = TRUE)
             
         } else if (input$peakcheck) {
             
             #If user checks box for peak wavelength histogram only, then display it
-            hist(dataset()[,3], breaks = binsPeakWave(), main = NULL, xlab = NULL, ylab = NULL, col = "blue", border = "white", xlim = c(input$insliderx[1] - 10, input$insliderx[2] + 10))
+            hist(dataset()[,3], breaks = binsPeakWave(), main = NULL, xlab = NULL, ylab = NULL, col = "blue", border = "white", xlim = c(input$insliderx[1], input$insliderx[2]))
             
         } else if (input$localpeakcheck) {
             
             #If user checks box for local peak wavelength histogram only, then display it
-            hist(localPeakWave(), breaks = binsLocWave(), main = NULL, xlab = NULL, ylab = NULL, col = rgb(0,1,0,0.5), border = "white", xlim = c(input$insliderx[1] - 10, input$insliderx[2] + 10))
+            hist(localPeakWave(), breaks = binsLocWave(), main = NULL, xlab = NULL, ylab = NULL, col = rgb(0,1,0,0.5), border = "white", xlim = c(input$insliderx[1], input$insliderx[2]))
             
         }
         
@@ -864,18 +1005,18 @@ server <- function(input, output, session) {
         #If user checks both boxes, then display both histograms
         if (input$absmaxcheck & input$localmaxcheck) {
             
-            hist(dataset()[,5], breaks = binsAbsMax(), main = NULL, xlab = NULL, ylab = NULL, col = "blue", border = "white", xlim = c(input$insliderx1[1] - 0.1, input$insliderx1[2] + 0.1))
+            hist(dataset()[,5], breaks = binsAbsMax(), main = NULL, xlab = NULL, ylab = NULL, col = "blue", border = "white", xlim = c(input$insliderx1[1], input$insliderx1[2]))
             hist(localMax(), breaks = binsLocMax(), col = rgb(0,1,0,0.5), border = "white", add = TRUE)
             
         } else if (input$absmaxcheck) {
             
             #If user checks box for absolute max histogram only, then display it
-            hist(dataset()[,5], breaks = binsAbsMax(), main = NULL, xlab = NULL, ylab = NULL, col = "blue", border = "white", xlim = c(input$insliderx1[1] - 0.1, input$insliderx1[2] + 0.1))
+            hist(dataset()[,5], breaks = binsAbsMax(), main = NULL, xlab = NULL, ylab = NULL, col = "blue", border = "white", xlim = c(input$insliderx1[1], input$insliderx1[2]))
             
         } else if (input$localmaxcheck) {
             
             #If user checks box for local max histogram only, then display it
-            hist(localMax(), breaks = binsLocMax(), main = NULL, xlab = NULL, ylab = NULL, col = rgb(0,1,0,0.5), border = "white", xlim = c(input$insliderx1[1] - 0.1, input$insliderx1[2] + 0.1))
+            hist(localMax(), breaks = binsLocMax(), main = NULL, xlab = NULL, ylab = NULL, col = rgb(0,1,0,0.5), border = "white", xlim = c(input$insliderx1[1], input$insliderx1[2]))
             
         }
         
@@ -909,9 +1050,8 @@ server <- function(input, output, session) {
         
     })
     
-    
     ###FUNCTIONS: SMOOTH SPLINE###
-
+    
     #Smooth Spline for specific row
     smoothSplPlot <- function() {
         
@@ -928,7 +1068,7 @@ server <- function(input, output, session) {
     
     
     ###SMOOTH SPLINE INTERPOLATION GRAPHS###
-    
+
     #Create smoothing spline line and plot it
     output$smoothLine <- renderPlot({
         
