@@ -370,78 +370,114 @@ body <- dashboardBody(
                            
                     )),
                 
-                fluidRow(
-                    
-                    column(3,
-                           
-                           #Create slider for Peak Wavelength Histogram
-                           uiOutput("slider"),
-                           textOutput("classwidth")
-                           
-                           ),
-                    
-                    column(1,
-                           
-                           #Create a checkbox for Peak wavelength Histogram
-                           checkboxInput("peakcheck", label = "Display Histogram?", value = TRUE)
-                           
-                           ),
-                    
-                    column(3,
-                           
-                           #Create slider for Local Peak Wavelength Histogram
-                           uiOutput("slider1"),
-                           textOutput("classwidth1")
-                           
-                           ),
-                    
-                    column(1,
-                           
-                           #Create a checkbox for Local Peak wavelength histogram
-                           checkboxInput("localpeakcheck", label = "Display Histogram?", value = TRUE)
-                           
-                           ),
-                    
-                    column(3,
-                           
-                           #Create slider for the horizontal axis range of the Peak/Local Peak Histogram
-                           uiOutput("sliderx")
-                           
-                    )),
-                
-                hr(),
-                
-                #Create row for text input
-                fluidRow(
-                    
-                    column(3,
-                           
-                           #Text input: Histogram Title
-                           textInput("textInp", "Histogram Title", "Peak/Local Peak Wavelength Histogram")
-                           
-                           ),
-                    
-                    column(3,
-                           
-                           #Text input: Horizontal Axis Title
-                           textInput("textInp1", "Horizontal Axis Title", "Wavelength")
-                           
-                           ),
-                    
-                    column(3,
-                           
-                           #Text input: Vertical axis Title
-                           textInput("textInp2", "Vertical Axis Title", "Frequency")
-                           
-                           ),
-                    
-                    column(1,
-                           
-                           #Action button: Apply changes
-                           actionButton('applyChange', "Show Plot With Title Edits")
-                           
-                    )),
-                
+                checkboxInput("showPltControl", "Display Plot Controls", value = TRUE),
+                conditionalPanel(condition = "input.showPltControl == '1'",
+                                 
+                                 h3("Bin Settings"),
+                                 
+                                 fluidRow(
+                                     
+                                     column(3,
+                                            
+                                            #Create slider for Peak Wavelength Histogram
+                                            uiOutput("slider"),
+                                            textOutput("classwidth")
+                                            
+                                     ),
+                                     
+                                     column(1,
+                                            
+                                            #Create a checkbox for Peak wavelength Histogram
+                                            checkboxInput("peakcheck", label = "Display Histogram", value = TRUE)
+                                            
+                                     ),
+                                     
+                                     column(3,
+                                            
+                                            #Create slider for Local Peak Wavelength Histogram
+                                            uiOutput("slider1"),
+                                            textOutput("classwidth1")
+                                            
+                                     ),
+                                     
+                                     column(1,
+                                            
+                                            #Create a checkbox for Local Peak wavelength histogram
+                                            checkboxInput("localpeakcheck", label = "Display Histogram", value = TRUE)
+                                            
+                                     )),
+                                 
+                                 hr(),
+                                 
+                                 h3("Title Settings"),
+                                 
+                                 #Create row for text input
+                                 fluidRow(
+                                     
+                                     column(3,
+                                            
+                                            #Text input: Histogram Title
+                                            textInput("textInp", "Histogram Title", "Peak/Local Peak Wavelength Histogram")
+                                            
+                                     ),
+                                     
+                                     column(3,
+                                            
+                                            #Text input: Horizontal Axis Title
+                                            textInput("textInp1", "Horizontal Axis Title", "Wavelength")
+                                            
+                                     ),
+                                     
+                                     column(3,
+                                            
+                                            #Text input: Vertical axis Title
+                                            textInput("textInp2", "Vertical Axis Title", "Frequency")
+                                            
+                                     ),
+                                     
+                                     column(1,
+                                            
+                                            #Action button: Apply changes
+                                            actionButton('applyChange', "Apply Title/Axis Settings")
+                                            
+                                     )),
+                                 
+                                 hr(),
+                                 
+                                 h3("Axis Settings"),
+                                 
+                                 fluidRow(
+                                     
+                                     column(1,
+                                            
+                                            uiOutput("lower")
+                                    
+                                     ),
+                                    
+                                     column(1,
+                                     
+                                            uiOutput("upper")
+                                                   
+                                     ),
+                                     
+                                     column(1,
+                                            
+                                            uiOutput("increment")
+                                            
+                                     ),
+                                     
+                                     
+                                     column(3,
+                                            
+                                            #Create slider for the horizontal axis range of the Peak/Local Peak Histogram
+                                            uiOutput("sliderx")
+                                            
+                                     )
+                                     
+                                     )
+                                 
+                                 
+                                 ),
                 
                 #Download button for histogram
                 downloadButton("downloadHist","Download Histogram Plot"),
@@ -452,78 +488,110 @@ body <- dashboardBody(
                 verbatimTextOutput("info6"),
                 hr(),
                 
-                fluidRow(
-                    
-                    column(3,
-                           
-                           #Create slider for Absolute Max Histogram
-                           uiOutput("slider2"),
-                           textOutput("classwidth2")
-                           
-                           ),
-                    
-                    column(1,
-                           
-                           #Create a checkbox for Peak wavelength Histogram)
-                           checkboxInput("absmaxcheck", label = "Display Histogram?", value = TRUE)
-                           
-                           ),
-                    
-                    column(3,
-                           
-                           #Create slider for Local Max Histogram
-                           uiOutput("slider3"),
-                           textOutput("classwidth3")
-                           
-                           ),
-                    
-                    column(1,
-                           
-                           #Create a checkbox for Peak wavelength Histogram)
-                           checkboxInput("localmaxcheck", label = "Display Histogram?", value = TRUE)
-                           
-                           ),
-                    
-                    column(3,
-                           
-                           #Create slider for the horizontal axis range of the Absolute/Local Max Histogram
-                           uiOutput("sliderx1")
-                    
-                )),
-                
-                hr(),
-                
-                #Create row for text input
-                fluidRow(
-                    
-                    column(3,
-                           
-                           #Text input: Histogram Title
-                           textInput("textInp3", "Histogram Title", "Absolute/Local Max Values Histogram")
-                           
-                           ),
-                    
-                    column(3,
-                           
-                           #Text input: Horizontal Axis Title
-                           textInput("textInp4", "Horizontal Axis Title", "Value")
-                           
-                           ),
-                    
-                    column(3,
-                           
-                           #Text input: Vertical axis Title
-                           textInput("textInp5", "Vertical Axis Title", "Frequency")
-                           
-                           ),
-                    
-                    column(1,
-                           
-                           #Action button: Apply changes
-                           actionButton('applyChange1', "Show Plot With Title Edits")
-                           
-                )),
-            
+                checkboxInput("showPltControl1", "Display Plot Controls", value = TRUE),
+                conditionalPanel(condition = "input.showPltControl1 == '1'",
+                                 
+                                 h3("Bin Settings"),
+                                 
+                                 fluidRow(
+                                     
+                                     column(3,
+                                            
+                                            #Create slider for Absolute Max Histogram
+                                            uiOutput("slider2"),
+                                            textOutput("classwidth2")
+                                            
+                                     ),
+                                     
+                                     column(1,
+                                            
+                                            #Create a checkbox for Peak wavelength Histogram)
+                                            checkboxInput("absmaxcheck", label = "Display Histogram", value = TRUE)
+                                            
+                                     ),
+                                     
+                                     column(3,
+                                            
+                                            #Create slider for Local Max Histogram
+                                            uiOutput("slider3"),
+                                            textOutput("classwidth3")
+                                            
+                                     ),
+                                     
+                                     column(1,
+                                            
+                                            #Create a checkbox for Peak wavelength Histogram)
+                                            checkboxInput("localmaxcheck", label = "Display Histogram", value = TRUE)
+                                            
+                                     )),
+                                 
+                                 hr(),
+                                 
+                                 h3("Title Settings"),
+                                 
+                                 #Create row for text input
+                                 fluidRow(
+                                     
+                                     column(3,
+                                            
+                                            #Text input: Histogram Title
+                                            textInput("textInp3", "Histogram Title", "Absolute/Local Max Values Histogram")
+                                            
+                                     ),
+                                     
+                                     column(3,
+                                            
+                                            #Text input: Horizontal Axis Title
+                                            textInput("textInp4", "Horizontal Axis Title", "Value")
+                                            
+                                     ),
+                                     
+                                     column(3,
+                                            
+                                            #Text input: Vertical axis Title
+                                            textInput("textInp5", "Vertical Axis Title", "Frequency")
+                                            
+                                     ),
+                                     
+                                     column(1,
+                                            
+                                            #Action button: Apply changes
+                                            actionButton('applyChange1', "Apply Title/Axis Settings")
+                                            
+                                     )),
+                                 
+                                 hr(),
+                                 
+                                 h3("Axis Settings"),
+                                 
+                                 fluidRow(
+                                     
+                                     column(1,
+                                            
+                                            uiOutput("lower1")
+                                            
+                                     ),
+                                     
+                                     column(1,
+                                            
+                                            uiOutput("upper1")
+                                            
+                                     ),
+                                     
+                                     column(1,
+                                            
+                                            uiOutput("increment1")
+                                            
+                                     ),
+                                     
+                                     column(3,
+                                            
+                                            #Create slider for the horizontal axis range of the Absolute/Local Max Histogram
+                                            uiOutput("sliderx1")
+                                            
+                                     ))
+                                 
+                                 ),
                 
                 #Download button for Absolute/local max histogram
                 downloadButton("downloadHist1","Download Histogram Plot"),
@@ -837,6 +905,54 @@ server <- function(input, output, session) {
         
     })
     
+    #Numeric input for minimum value for horizontal axis
+    output$lower <- renderUI({
+        
+        minimum <- floor(min(c(dataset()[,3], localPeakWave())))
+        
+        numericInput("lowerBound", "Minimum", value = minimum)
+        
+    })
+    
+    output$upper <- renderUI({
+        
+        maximum <- ceiling(max(c(dataset()[,3], localPeakWave())))
+        
+        numericInput("upperBound", "Maximum", value = maximum)
+        
+    })
+    
+    output$increment <- renderUI({
+        
+        defIncrement <- 5
+        
+        numericInput("inc", "Increment", value = defIncrement)
+        
+    })
+    
+    output$lower1 <- renderUI({
+        
+        minimum <- floor(min(c(dataset()[,5], localMax())))
+        
+        numericInput("lowerBound1", "Minimum", value = minimum)
+        
+    })
+    
+    output$upper1 <- renderUI({
+        
+        maximum <- ceiling(max(c(dataset()[,5],localMax())))
+        
+        numericInput("upperBound1", "Maximum", value = maximum)
+        
+    })
+    
+    output$increment1 <- renderUI({
+        
+        defIncrement <- 0.1
+        
+        numericInput("inc1", "Increment", value = defIncrement)
+        
+    })
     
     ###REACTIVE DATA FRAME VALUES FOR HEAT MAP PLOTS/DOWNLOAD BUTTONS###
     
@@ -902,7 +1018,7 @@ server <- function(input, output, session) {
     }
     
     #Relative Intensity Heat Map
-    relIntPlot <- function(){
+    relIntPlot <- function() {
         
         #Make ggplot2 static plot
         ggplot(df_relInt(), aes(X, Y, fill= Relative_Intensity)) + 
@@ -981,18 +1097,18 @@ server <- function(input, output, session) {
         if (input$peakcheck & input$localpeakcheck) {
             
             #Display both histograms
-            hist(dataset()[,3], breaks = binsPeakWave(), main = NULL, xlab = NULL, ylab = NULL, col = "blue", border = "white", xlim = c(input$insliderx[1], input$insliderx[2]))
-            hist(localPeakWave(), breaks = binsLocWave(), col = rgb(0,1,0,0.5), border = "white", add = TRUE)
+            hist(dataset()[,3], breaks = binsPeakWave(), xaxt = "n", main = NULL, xlab = NULL, ylab = NULL, col = "blue", border = "white", xlim = c(input$insliderx[1], input$insliderx[2]))
+            hist(localPeakWave(), breaks = binsLocWave(), xaxt = "n", col = rgb(0,1,0,0.5), border = "white", add = TRUE)
             
         } else if (input$peakcheck) {
             
             #If user checks box for peak wavelength histogram only, then display it
-            hist(dataset()[,3], breaks = binsPeakWave(), main = NULL, xlab = NULL, ylab = NULL, col = "blue", border = "white", xlim = c(input$insliderx[1], input$insliderx[2]))
+            hist(dataset()[,3], breaks = binsPeakWave(), xaxt = "n", main = NULL, xlab = NULL, ylab = NULL, col = "blue", border = "white", xlim = c(input$insliderx[1], input$insliderx[2]))
             
         } else if (input$localpeakcheck) {
             
             #If user checks box for local peak wavelength histogram only, then display it
-            hist(localPeakWave(), breaks = binsLocWave(), main = NULL, xlab = NULL, ylab = NULL, col = rgb(0,1,0,0.5), border = "white", xlim = c(input$insliderx[1], input$insliderx[2]))
+            hist(localPeakWave(), breaks = binsLocWave(), xaxt = "n", main = NULL, xlab = NULL, ylab = NULL, col = rgb(0,1,0,0.5), border = "white", xlim = c(input$insliderx[1], input$insliderx[2]))
             
         }
         
@@ -1005,18 +1121,18 @@ server <- function(input, output, session) {
         #If user checks both boxes, then display both histograms
         if (input$absmaxcheck & input$localmaxcheck) {
             
-            hist(dataset()[,5], breaks = binsAbsMax(), main = NULL, xlab = NULL, ylab = NULL, col = "blue", border = "white", xlim = c(input$insliderx1[1], input$insliderx1[2]))
-            hist(localMax(), breaks = binsLocMax(), col = rgb(0,1,0,0.5), border = "white", add = TRUE)
+            hist(dataset()[,5], breaks = binsAbsMax(), xaxt = "n", main = NULL, xlab = NULL, ylab = NULL, col = "blue", border = "white", xlim = c(input$insliderx1[1], input$insliderx1[2]))
+            hist(localMax(), breaks = binsLocMax(), xaxt = "n", col = rgb(0,1,0,0.5), border = "white", add = TRUE)
             
         } else if (input$absmaxcheck) {
             
             #If user checks box for absolute max histogram only, then display it
-            hist(dataset()[,5], breaks = binsAbsMax(), main = NULL, xlab = NULL, ylab = NULL, col = "blue", border = "white", xlim = c(input$insliderx1[1], input$insliderx1[2]))
+            hist(dataset()[,5], breaks = binsAbsMax(), xaxt = "n", main = NULL, xlab = NULL, ylab = NULL, col = "blue", border = "white", xlim = c(input$insliderx1[1], input$insliderx1[2]))
             
         } else if (input$localmaxcheck) {
             
             #If user checks box for local max histogram only, then display it
-            hist(localMax(), breaks = binsLocMax(), main = NULL, xlab = NULL, ylab = NULL, col = rgb(0,1,0,0.5), border = "white", xlim = c(input$insliderx1[1], input$insliderx1[2]))
+            hist(localMax(), breaks = binsLocMax(), xaxt = "n", main = NULL, xlab = NULL, ylab = NULL, col = rgb(0,1,0,0.5), border = "white", xlim = c(input$insliderx1[1], input$insliderx1[2]))
             
         }
         
@@ -1034,7 +1150,12 @@ server <- function(input, output, session) {
         
         #When action button is pressed, apply changes
         input$applyChange
-        isolate({title(main = input$textInp, xlab = input$textInp1, ylab = input$textInp2)})
+        isolate({
+            
+            title(main = input$textInp, xlab = input$textInp1, ylab = input$textInp2)
+            axis(1, at = seq(input$lowerBound, input$upperBound, by = input$inc))
+            
+            })
         
     })
     
@@ -1046,7 +1167,12 @@ server <- function(input, output, session) {
         
         #When action button is pressed, Apply changes
         input$applyChange1
-        isolate({title(main = input$textInp3, xlab = input$textInp4, ylab = input$textInp5)})
+        isolate({
+            
+            title(main = input$textInp3, xlab = input$textInp4, ylab = input$textInp5)
+            axis(1, at = seq(input$lowerBound1, input$upperBound1, by = input$inc1))
+        
+            })
         
     })
     
@@ -1518,7 +1644,7 @@ server <- function(input, output, session) {
             
             peakLocWavePlot()
             title(main = input$textInp, xlab = input$textInp1, ylab = input$textInp2)
-            
+            axis(1, at = seq(input$lowerBound, input$upperBound, by = input$inc))
             dev.off()    
         }
         
@@ -1577,7 +1703,7 @@ server <- function(input, output, session) {
             
             absLocMaxPlot()
             title(main = input$textInp3, xlab = input$textInp4, ylab = input$textInp5)
-            
+            axis(1, at = seq(input$lowerBound1, input$upperBound1, by = input$inc1))
             dev.off()   
         }
         
