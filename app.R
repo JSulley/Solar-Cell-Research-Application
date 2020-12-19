@@ -43,32 +43,6 @@ sidebar <- dashboardSidebar(
                     selected = 1),
         hr(),
         
-        #Dynamic portion
-        #Make two boxes that accept numeric entries for two wavelength values
-        h3("Wavelength Input", align = "center"),
-        p('Input two distinct wavelengths', align = "center"),
-        
-        numericInput('wavelength1', 
-                     HTML(paste("Enter", paste0("&lambda;",tags$sub(1)))),
-                     value = NULL, min = 0),
-        
-        numericInput('wavelength2',
-                     HTML(paste("Enter", paste0("&lambda;",tags$sub(2)))),
-                     value = NULL, min = 0),
-        
-        #Create Action button for user
-        actionButton("go","Go!"),
-        hr(),
-        
-        #Make numeric entry for row number to view smoothing spline interpolation graph with scatterplot
-        h4("Smooth Spline Interpolation", align = "center"),
-        h4("Display Input", align = "center"),
-        numericInput('rowIndex', "Enter row number" , value = NULL, min = 0),
-        
-        #Create action button for it
-        actionButton("go1", "Go!"),
-        hr(),
-        
         
         #Create remaining menu items 
         menuItem("Dataset Heatmaps", tabName = "datasetDash"),
@@ -201,13 +175,29 @@ body <- dashboardBody(
                                     hr(),
                            
                                     #Histogram main and axes title
-                                    h3("Histogram Label Control"),
-                                    p("The main and axes titles of any histogram can now be renamed! In the text
-                                      input boxes, just enter the name for one, two or all labels and press \"Show
-                                      Plot With Title Edits\" to see a preview before downloading."),
-                                    p("Note: The button does not need to be pressed first in order for the changes
-                                      to appear on the download."),
-                                    img(src = "Title Example.PNG", height = 520, width = 900),
+                                    h3("Histogram Plot Controls"),
+                                    p("The controls of the histograms have expanded causing the plot settings to be
+                                      divided into three sections: Bin, Title and Axis. For \“Bin Settings\”, the
+                                      number of bins for the axis can be controlled through the slider, and any
+                                      histogram can be shown/hidden by checking/unchecking the box next to the
+                                      sliders. \“Title Settings\” enables you to rename the main and axis titles.
+                                      Finally, \“Axis Settings\” controls the location of the tick marks on the
+                                      horizontal axis also the distance between each one. There is also a range slider
+                                      that controls the horizontal axis’ limits."),
+                                    p("In order to see the new names and axis on the plot, you must first press
+                                      \“Apply Title/Axis Settings\”. The sliders and checkboxes apply the settings to
+                                      the plot immediately, so those do not require you to press the button to be
+                                      shown on the plot. You can also show/hide the plot controls by simply checking/
+                                      unchecking the box labeled \“Display Plot Controls\”."),
+                                    p("Above those lies an alternative method for inputting the number of bins. This
+                                      one, however, controls both plots based on the color. There is one for the blue
+                                      histograms (Peak Wavelength and Absolute Max Histograms) and one for the green
+                                      histograms (Local Peak Wavelength and Local Max Histograms). Type in the number
+                                      then press \“Enter\”."),
+                                    p(strong("Note:"), "You need to have the plot controls shown for the change to take
+                                      place."),
+                                    img(src = "Numeric Input Number of Bins.PNG", width = 700),
+                                    img(src = "Plot Controls.PNG", height = 450, width = 900),
                                     hr(),
                                     
                                     #Title option for heatmaps
@@ -215,7 +205,17 @@ body <- dashboardBody(
                                     p("The title for both dataset heatmaps is optional when downloaded."),
                                     p("Simply leave the box unchecked if the title should be omitted. Otherwise,
                                       go ahead and check it out!"),
-                                    img(src = "HeatMap Title Box.PNG")
+                                    img(src = "HeatMap Title Box.PNG"),
+                                    hr(),
+                                    
+                                    h3("Dataset Smooth Splines"),
+                                    p("This plot contains the smoothing spline for each coordinate in a dataset and
+                                      can be generated by pressing \“Show All Smooth Splines\” after uploading the
+                                      dataset. The row number associated with a line is displayed by simply bringing
+                                      the cursor near the line, and the program shows the result underneath the plot.
+                                      If the cursor is not close enough to a line, a message will be shown asking you
+                                      to bring the cursor closer to it."),
+                                    img(src = "Multiple Smooth Splines.png", height = 520, width = 950)
                                     )
                                 
                     )   
@@ -250,12 +250,35 @@ body <- dashboardBody(
         #Content for Relative/Wavelength Intensity Plots
         tabItem(tabName = "relativeDash",
                 
+                fluidRow(
+                    column(4,
+                           
+                           #Make two boxes that accept numeric entries for two wavelength values
+                           h3("Wavelength Input", align = "left"),
+                           p('Input two distinct wavelengths', align = "left"),
+                           
+                           numericInput('wavelength1', 
+                                        HTML(paste("Enter", paste0("&lambda;",tags$sub(1)))),
+                                        value = NULL, min = 0),
+                           
+                           numericInput('wavelength2',
+                                        HTML(paste("Enter", paste0("&lambda;",tags$sub(2)))),
+                                        value = NULL, min = 0),
+                           
+                           #Create Action button for user
+                           actionButton("go","Go!")
+                           
+                           )
+                    
+                ),
                 #Make fluid row for interactive relative intensity map 
                 fluidRow(
                     
                     h3(strong(em("Note:")), "Did you change the inputs for one or both wavelengths,
                     but the plot(s) look(s) the same/did not change? Make sure you press \"Go!\"
                     after updating any wavelength values!", align = "center"),
+                    
+                    
                     
                     column(12,
                            
@@ -606,13 +629,35 @@ body <- dashboardBody(
         
         #Content for "Export Allspectra" tab
         tabItem(tabName = "smoothSpline",
+                actionButton("go4", "Show All Smooth Splines"),
+                
+                #Render Plot
+                plotOutput("datasetSplines", hover = hoverOpts('SmoothHover', delay = 200)) %>%
+                    withSpinner(getOption("spinner.type", 8)),
+                uiOutput("tooltip"),
+                
+                fluidRow(
+                    
+                    column(4,
+                            
+                           #Make numeric entry for row number to view smoothing spline interpolation graph with scatterplot
+                           h4("Smooth Spline Interpolation Display Input", align = "left"),
+                           numericInput('rowIndex', "Enter row number" , value = NULL, min = 0),
+                           
+                           #Create action button for it
+                           actionButton("go1", "Go!"),
+                           hr()
+                    
+                        )),
+                
                 
                 #Download button for smoothing spline plot
                 downloadButton("downloadSpectrum", "Download Spectrum Plot"),
                 
                 #Output smoothing spline plot
                 plotOutput("smoothLine", 
-                           brush = brushOpts("smoothPlot_brush",resetOnNew = TRUE)),
+                           brush = brushOpts("smoothPlot_brush", resetOnNew = TRUE)) %>%
+                    withSpinner(getOption("spinner.type", 8)),
                 
                 #Output zoomed smoothing spline plot
                 plotOutput("zoomsmooth"),
@@ -1176,7 +1221,80 @@ server <- function(input, output, session) {
         
     })
     
+    
+    ###REACTIVE VALUES REQUIRED###
+    longDf <- eventReactive(input$go4, {
+        
+        #Convert to matrix
+        data <- as.matrix(first_df())
+        
+        #Get rid of 1st row and 1st 2 columns
+        data <- data[-1,-(1:2)]
+        
+        #Calculate number of columns
+        numberOfColumns <- ncol(data)
+        numberOfRows <- nrow(data)
+        
+        #Normalize intensity values for each row
+        for (i in 1:numberOfRows) {
+            
+            data[i,] <- data[i,]/max(data[i,])
+            
+        }
+        
+        #Create matrix with 3 columns (wavelength, row number, predicted intensity)
+        splineMatrix <- matrix(rep(0, numberOfRows*numberOfColumns*3), ncol = 3)
+        colnames(splineMatrix) <- c("x","row_number","y")
+        
+        #Repeat row index values as many number of columns there are
+        splineMatrix[,2] <- rep(1:numberOfRows, each = numberOfColumns)
+        
+        #Generate sequence from 1 to number of columns
+        colSequence <- 1:numberOfColumns
+        
+        #Make for loop
+        #The number of rows will be the iterations needed to retrieve coordinates based on smooth spline
+        for (j in 1:numberOfRows){
+            
+            #Subset the ith row and convert to a vector by unlisting along with
+            #getting rid of the names associated with each element.
+            jth_row <- unlist(data[j,], use.names = FALSE)
+            
+            #Make smooth spline with wavelengths on the horizontal axis and the corresponding intensities (normalized)
+            #on the vertical axis
+            splinesmoothfit <- smooth.spline(x = wavelengths(), y = jth_row)
+            
+            #Calculate row indexes to replace by shifting and using value of j
+            rowIndexes <- colSequence + (j-1) * numberOfColumns
+            
+            #Update spline_matrix
+            splineMatrix[rowIndexes,1] <- splinesmoothfit$x
+            splineMatrix[rowIndexes,3] <- splinesmoothfit$y
+            
+        }
+        
+        splineDf <- as.data.frame(splineMatrix)
+        splineDf
+        
+    })
+    
     ###FUNCTIONS: SMOOTH SPLINE###
+    
+    #Smooth Spline for all rows
+    allSmooth <- function() {
+        
+        #Generate vector consisting of values 1 to number of rows
+        rowIndexes <- unique(longDf()$row_number) 
+        
+        plot(longDf()$x, main = "Dataset Smooth Spline Lines", xlab = "Wavelength", ylab = "Normal Intensity", type = "n", xlim = c(min(longDf()$x),max(longDf()$x)), ylim = c(0,1))
+        
+        for (k in rowIndexes) {
+            
+            lines(x = longDf()$x[longDf()$row_number == k], y = longDf()$y[longDf()$row_number == k],col = "red", lwd = 2)
+            
+        }
+        
+    }
     
     #Smooth Spline for specific row
     smoothSplPlot <- function() {
@@ -1195,6 +1313,37 @@ server <- function(input, output, session) {
     
     ###SMOOTH SPLINE INTERPOLATION GRAPHS###
 
+    #Tool tip
+    output$tooltip <- renderUI({
+        
+        req(input$SmoothHover)
+        
+        verbatimTextOutput("selectedRowNum")
+        
+    })
+    
+    #Value of row
+    output$selectedRowNum <- renderPrint({
+        
+        hover <- input$SmoothHover
+        
+        rowNum <- unique(nearPoints(longDf(), hover, xvar = 'x', yvar = 'y', threshold = 7)$row_number)[1]
+        
+        if (is.na(rowNum)) {
+            print("Bring cursor closer to a line.")
+        } else {
+            paste("Row Number:", rowNum)
+        }
+        
+    })
+    
+    #Create smoothing spline lines
+    output$datasetSplines <- renderPlot({
+        
+        allSmooth()
+        
+    })
+    
     #Create smoothing spline line and plot it
     output$smoothLine <- renderPlot({
         
