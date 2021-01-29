@@ -10,7 +10,7 @@ library(dplyr)
 library(SplinesUtils)
 library(shinycssloaders)
 source("R scripts/Absolute Max Function.R")
-source("R scripts/Absolute Max Function 2.0.R")
+source("R scripts/Relative Intensity Function.R")
 source("R scripts/Local Max Function.R")
 
 #Set up shiny dashboard
@@ -76,43 +76,43 @@ body <- dashboardBody(
                                     
                                     #Make note to user for what the app is expecting as an input
                                     p("The program assumes the CSV file as the following format:"),
-                                    p("1. The first row is the wavelengths."),
-                                    p("2. The first two columns are the x and y coordinates."),
-                                    p("3. Nothing in the first two boxes."),
-                                    p("4. The rest are the intensities."),
+                                    tags$ul(
+                                        tags$li("Nothing in the first two boxes."),
+                                        tags$li("The first row is the wavelengths."),
+                                        tags$li("The first two columns are the x and y coordinates."),
+                                        tags$li("The rest are the intensities."),
+                                        ),
                                     strong("Example:"),
                                     br(),
                                     
                                     #Image demonstrating format of CSV file
                                     img(src = "Example Data.PNG", height = 200, width = 350),
-                                    hr(),
+                                    br(),
+                                    br(),
                                     
                                     #Make note of program being able to accept TSV files
-                                    p(strong("Update:"), "The program now accepts files that are in TSV format (tab-
-                                      separated values). It assumes the same structure."),
-                                    p("You can now choose what the separator is before uploading a file! Underneath
-                                      the file upload widget, just choose either tab or comma.")
+                                    p("The program also accepts files that are in TSV format (tab-separated
+                                    values). It assumes the same structure as it would for CSV files.
+                                    In order to ensure that the program reads the dataset correctly, you need to
+                                    specify the separator (tab or comma) before uploading it. This can be done
+                                      underneath the file upload widget.")
                                     
                            ),
                            
                            #Note regarding downloading plots.
                            tabPanel("Downloading Plots/Tables",
                                     
-                                    p("You are able to download the plots/tables displayed!"),
-                                    p("The plots are downloaded in SVG format, while the tables are downloaded in
-                                      CSV format."),
-                                    p("For Table 2 to appear, you", strong("must"), 
-                                    "input two different wavelengths first."),
-                                    hr(), 
+                                    p("You are able to download the plots/tables displayed! The plots can be
+                                      downloaded in SVG, JPEG and PNG format, while the tables are downloaded only in
+                                      CSV format. To specify format for the plots, go to \"Plot Download Format\" and
+                                      select the format you want."),
+                                    p("For Table 2 in \"Dataset Tables\" to appear and be available for download,
+                                      you", strong("must"), "input two different wavelengths first."),
                                     
                                     #Note what calculation is being done for relative intensity
                                     p(strong("Note:"), "For the relative intensity, it is the ratio of",
                                       HTML(paste0("&lambda;",tags$sub(1))) ,"intensity to",
-                                      HTML(paste0("&lambda;",tags$sub(2))) ,"intensity"),
-                                    
-                                    p(strong("Update:"), "The plots can now be downloaded in JPEG and PNG format.
-                                      Under the \"Plot Download Format\" section, click on the box and 
-                                      select the format you want!")),
+                                      HTML(paste0("&lambda;",tags$sub(2))) ,"intensity")),
                            
                            #Note recent features
                            tabPanel("More Features",
@@ -177,23 +177,23 @@ body <- dashboardBody(
                                     #Histogram main and axes title
                                     h3("Histogram Plot Controls"),
                                     p("The controls of the histograms have expanded causing the plot settings to be
-                                      divided into three sections: Bin, Title and Axis. For \“Bin Settings\”, the
+                                      divided into three sections: Bin, Title and Axis. For \"Bin Settings\", the
                                       number of bins for the axis can be controlled through the slider, and any
                                       histogram can be shown/hidden by checking/unchecking the box next to the
-                                      sliders. \“Title Settings\” enables you to rename the main and axis titles.
-                                      Finally, \“Axis Settings\” controls the location of the tick marks on the
+                                      sliders. \"Title Settings\" enables you to rename the main and axis titles.
+                                      Finally, \"Axis Settings\" controls the location of the tick marks on the
                                       horizontal axis also the distance between each one. There is also a range slider
-                                      that controls the horizontal axis’ limits."),
+                                      that controls the horizontal axis' limits."),
                                     p("In order to see the new names and axis on the plot, you must first press
-                                      \“Apply Title/Axis Settings\”. The sliders and checkboxes apply the settings to
+                                      \"Apply Title/Axis Settings\". The sliders and checkboxes apply the settings to
                                       the plot immediately, so those do not require you to press the button to be
                                       shown on the plot. You can also show/hide the plot controls by simply checking/
-                                      unchecking the box labeled \“Display Plot Controls\”."),
+                                      unchecking the box labeled \"Display Plot Controls\"."),
                                     p("Above those lies an alternative method for inputting the number of bins. This
                                       one, however, controls both plots based on the color. There is one for the blue
                                       histograms (Peak Wavelength and Absolute Max Histograms) and one for the green
                                       histograms (Local Peak Wavelength and Local Max Histograms). Type in the number
-                                      then press \“Enter\”."),
+                                      then press \"Enter\"."),
                                     p(strong("Note:"), "You need to have the plot controls shown for the change to take
                                       place."),
                                     img(src = "Numeric Input Number of Bins.PNG", width = 700),
@@ -210,7 +210,7 @@ body <- dashboardBody(
                                     
                                     h3("Dataset Smooth Splines"),
                                     p("This plot contains the smoothing spline for each coordinate in a dataset and
-                                      can be generated by pressing \“Show All Smooth Splines\” after uploading the
+                                      can be generated by pressing \"Show All Smooth Splines\" after uploading the
                                       dataset. The row number associated with a line is displayed by simply bringing
                                       the cursor near the line, and the program shows the result underneath the plot.
                                       If the cursor is not close enough to a line, a message will be shown asking you
@@ -245,7 +245,25 @@ body <- dashboardBody(
                 #Output heat map for Peak Wavelength and Information
                 plotOutput("peakWaveHeatMap", click = "click") %>%
                     withSpinner(getOption("spinner.type", 8)),
-                verbatimTextOutput("info2")),
+                verbatimTextOutput("info2"),
+                
+                fluidRow(column(4,
+                                
+                                uiOutput("scaleLow")
+                                
+                                ),
+                         
+                         column(4,
+                                
+                                uiOutput("scaleUp")
+                                
+                                ),
+                         
+                         column(4,
+                                
+                                actionButton("applyLimits", "Enter")
+                                
+                                ))),
         
         #Content for Relative/Wavelength Intensity Plots
         tabItem(tabName = "relativeDash",
@@ -669,26 +687,30 @@ body <- dashboardBody(
         tabItem(tabName = "about",
                 h1("About the Application"),
                 h3("It imports a cathodoluminescence dataset, which is obtained from images of a
-                   photovoltaic cell. It can visualize the characterization of the luminescence of
-                   solar cells, distribution of the wavelengths associated with the luminescense,
-                   the relationship between both luminescence and the wavelengths and more."), 
-                h3("The application can also export the plots/tables."),
-                h3("It is a product of the collaboration between the Mathematics Department and
-                   the Engineering Techonology Department at Texas A&M University-Central Texas. It
-                   is meant to enhance the Engineering Technology Department's research about solar
-                   cells through statistics."),
-                h3("The application is still updated from time to time.")
+                   photovoltaic cell. Using the dataset, the program can visualize the
+                   characterization of the luminescence of solar cells, distribution of the
+                   wavelengths associated with the luminescence, the relationship between both
+                   luminescence and the wavelengths and more. The plots/tables generated are
+                   capable of being downloaded.", 
+                   br(), 
+                   br(),
+                   "This application is a product of the collaboration between both the Mathematics
+                   Department and the Engineering Technology Department at 
+                   Texas A&M University-Central Texas. The purpose of it is to enhance the
+                   Engineering Technology Department's research about solar cells through
+                   statistics. It is updated from time to time with new features and
+                   improvements."),
         )
     ))
 
 
-# Define UI for application that outputs heat maps and tables
+# Define UI
 ui <- dashboardPage(header = header,
                     sidebar = sidebar,
                     body = body)
 
 
-# Define server logic required to output heat maps and tables
+# Define server logic
 server <- function(input, output, session) {
     
     #Increase file size input
@@ -707,11 +729,11 @@ server <- function(input, output, session) {
 
     })
     
-    #Use abs_max_func (Absolute Max Function.R) for data frame
-    dataset <- eventReactive(input$file$datapath,{
+    #Use abs_max_func (Absolute Max Function.R)
+    dataset <- eventReactive(input$file$datapath, {
         
         #Compute dataframe
-        abs_max_func(first_df())
+        absolute_max_function(first_df())
         
     })
     
@@ -719,7 +741,7 @@ server <- function(input, output, session) {
     local_max_list <- eventReactive(input$file$datapath, {
         
         #Determine list of consisting of wavelengths and their corresponding intensities in their respective row
-        local_max_func(first_df())
+        local_max_function(first_df())
         
     })
     
@@ -774,11 +796,11 @@ server <- function(input, output, session) {
     
     ###ACTION BUTTONS###
     
-    #Create table using abs_max_func_2 (Absolute Max Function 2.0.R) function
+    #Create table using relative_intensity_function (Relative Intensity Function.R) function
     bigger_data <- eventReactive(input$go, {
         
-        #Combine dataset() with dataframe created by abs_max_func_2 (Absolute Max Function 2.0.R) by column
-        cbind(dataset(),abs_max_func_2(first_df(),input$wavelength1,input$wavelength2))
+        #Combine dataset() with dataframe created by relative_intensity_function (Relative Intensity Function.R) by column
+        cbind(dataset(), relative_intensity_function(first_df(),input$wavelength1,input$wavelength2))
         
     })
     
@@ -1058,7 +1080,7 @@ server <- function(input, output, session) {
         
         #Make ggplot2 static plot
         ggplot(df_peakWave(), aes(X, Y, fill= Wavelength)) + 
-            geom_tile() + theme_ipsum() + xlab("X") + ylab("Y") + labs(fill = "Wavelength") + scale_fill_gradient(low = "black", high = "red")
+            geom_tile() + theme_ipsum() + xlab("X") + ylab("Y") + labs(fill = "Wavelength")
         
     }
     
@@ -1098,13 +1120,44 @@ server <- function(input, output, session) {
         #Generate graph
         normMaxIntPlot() + ggtitle("Normal Max Intensity Plot") 
         
+        
+        
     })
+    
+    #Limits of the gradient
+    output$scaleLow <- renderUI({
+        
+        minimum <- min(df_peakWave()$Wavelength)
+        
+        numericInput("scaleLowerVal", "Enter Lower Limit Of Color Gradient", value = minimum)
+        
+        
+    })
+    
+    output$scaleUp <- renderUI({
+        
+        maximum <- max(df_peakWave()$Wavelength)
+        
+        numericInput("scaleUpperVal", "Enter Upper Limit Of Color Gradient", value = maximum)
+        
+        
+    })
+    
     
     #Peak Wavelength Heat Map 
     output$peakWaveHeatMap <- renderPlot({
         
         #Generate graph with title
-        peakWavePlot() + ggtitle("Peak Wavelength Plot")
+        p <- peakWavePlot() + ggtitle("Peak Wavelength Plot")
+        
+        p
+        
+        input$applyLimits
+        isolate({
+        
+            p + scale_fill_gradient(low = "#800020", high = "red", limits = c(input$scaleLowerVal,input$scaleUpperVal), na.value = "black")
+            
+        })
         
     })
     
@@ -1371,7 +1424,7 @@ server <- function(input, output, session) {
         
         brush <- input$smoothPlot_brush
         
-        if(!is.null(brush)) {
+        if (!is.null(brush)) {
             window_margins$x <- c(brush$xmin, brush$xmax)
             window_margins$y <- c(brush$ymin, brush$ymax)
         } else {
@@ -1517,8 +1570,8 @@ server <- function(input, output, session) {
                 
             }
             
-            if(!input$checkTitle1) {print(peakWavePlot())}
-            else {print(peakWavePlot() + ggtitle("Peak Wavelength Plot"))}
+            if(!input$checkTitle1) {print(peakWavePlot() + scale_fill_gradient(low = "#800020", high = "red", limits = c(input$scaleLowerVal,input$scaleUpperVal), na.value = "black"))}
+            else {print(peakWavePlot() + ggtitle("Peak Wavelength Plot") + scale_fill_gradient(low = "#800020", high = "red", limits = c(input$scaleLowerVal,input$scaleUpperVal), na.value = "black"))}
             dev.off()    
         }
         
@@ -1982,7 +2035,7 @@ server <- function(input, output, session) {
     output$info6 <- renderPrint({
         
         #If no bin is clicked on
-        if(is.null(input$click4$x)) return()
+        if (is.null(input$click4$x)) return()
         
         #Create reactive value for current peak wavelength histogram
         z <- hist(dataset()[,3], breaks = binsPeakWave())
@@ -2092,7 +2145,7 @@ server <- function(input, output, session) {
     output$info7 <- renderPrint({
         
         #If no bin is clicked on
-        if(is.null(input$click5$x)) return()
+        if (is.null(input$click5$x)) return()
         
         #Create reactive value for current absolute max histogram
         z <- hist(dataset()[,5], breaks = binsAbsMax())
@@ -2199,13 +2252,14 @@ server <- function(input, output, session) {
     
     #Output information for smoothing spline: local max through brush
     output$info8 <- renderPrint({
-        
+            
         #Determine x and y values of local max
         Wavelength <- local_max_points()[1,]
         Normal_Intensity <- local_max_points()[2,]
         
         #Print local max/min points
-        brushedPoints(data.frame(Wavelength, Normal_Intensity), input$smoothPlot_brush, xvar = "Wavelength", yvar = "Normal_Intensity")
+        brushedPoints(data.frame(Wavelength, Normal_Intensity), input$smoothPlot_brush,
+                      xvar = "Wavelength", yvar = "Normal_Intensity")
         
     })
     
@@ -2224,7 +2278,8 @@ server <- function(input, output, session) {
     output$classwidth1 <- renderText({
         
         #Display Class Width
-        paste("Bin width is", (max(binsLocWave()) - min(binsLocWave()))/(length(binsLocWave())-1), "nm")
+        paste("Bin width is",
+              (max(binsLocWave()) - min(binsLocWave()))/(length(binsLocWave())-1), "nm")
         
     })
     
@@ -2232,7 +2287,8 @@ server <- function(input, output, session) {
     output$classwidth2 <- renderText({
         
         #Display Class Width
-        paste("Bin width is", (max(binsAbsMax()) - min(binsAbsMax()))/(length(binsAbsMax())-1))
+        paste("Bin width is",
+              (max(binsAbsMax()) - min(binsAbsMax()))/(length(binsAbsMax())-1))
         
     })
     
@@ -2240,7 +2296,8 @@ server <- function(input, output, session) {
     output$classwidth3 <- renderText({
         
         #Display Class Width
-        paste("Bin width is", (max(binsLocMax()) - min(binsLocMax()))/(length(binsLocMax())-1))
+        paste("Bin width is", 
+              (max(binsLocMax()) - min(binsLocMax()))/(length(binsLocMax())-1))
         
     })
     
@@ -2249,14 +2306,22 @@ server <- function(input, output, session) {
     
     df_t1 <- reactive({
         test <- dataset()
-        colnames(test) <- c("X","Y",paste0("&lambda;",tags$sub("peak")),"Intensity", "Normal Intensity")
+        colnames(test) <- c("X", 
+                            "Y",
+                            paste0("&lambda;",tags$sub("peak")),
+                            "Intensity",
+                            "Normal Intensity")
         test
     })
     
     df_t2 <- reactive({
         
         test <- bigger_data()[,-(1:5)]
-        colnames(test) <- c(paste(paste0("&lambda;",tags$sub(1)),"Intensity"), paste(paste0("&lambda;",tags$sub(2)),"Intensity"), paste("Normal", paste0("&lambda;",tags$sub(1)),"Intensity"), paste("Normal", paste0("&lambda;",tags$sub(2)),"Intensity"), "Relative Intensity")
+        colnames(test) <- c(paste(paste0("&lambda;", tags$sub(1)), "Intensity"), 
+                            paste(paste0("&lambda;", tags$sub(2)), "Intensity"),
+                            paste("Normal", paste0("&lambda;", tags$sub(1)), "Intensity"),
+                            paste("Normal", paste0("&lambda;", tags$sub(2)), "Intensity"),
+                            "Relative Intensity")
         test
         
     })
