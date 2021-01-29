@@ -1,83 +1,86 @@
-#Assumes that local min values are not wanted
-local_max_func <- function(x) {
+# About this function:
+# It determines and records the local max coordinates for every smoothing spline.
+# The output is a list containing two lists:
+# Local Max x-coordinate List, Local Max y-coordinate List
+
+################################################################################
+
+local_max_function <- function(dataframe) {
   
   #Convert dataset to matrix
-  z <- as.matrix(x)
+  data_matrix <- as.matrix(dataframe)
   
-  #Extract Wavelengths
-  wave <- z[1,-(1:2)]
+  #Subset the wavelengths (first row) from 'data_matrix'
+  #The first two entries in that row are NA so omit them
+  dataset_wavelengths <- data_matrix[1,-(1:2)]
   
-  #Make endpoints vector
-  endpoints_x <- c(min(wave), max(wave))
+  #Make vector consisting of endpoints
+  #Left endpoint: Minimum wavelength
+  #Right endpoint: Maximum wavelength
+  minimum_wavelength <- min(dataset_wavelengths)
+  maximum_wavelength <- max(dataset_wavelengths)
+  endpoints_wavelength <- c(minimum_wavelength, maximum_wavelength)
   
-  #Wavelengths and coordinates (1st 2 columns are not needed)
-  z <- z[-1,-(1:2)]
+  #Remove wavelengths and coordinates
+  #Wavelengths are in the first row
+  #Coordinates are in the first two columns
+  data_matrix <- data_matrix[-1,-(1:2)]
+  
+  #Number of rows
+  number_of_rows <- nrow(data_matrix)
   
   #Create a list for local max values
-  local_max_y_list <- vector("list", nrow(z))
-  local_max_x_list <- vector("list", nrow(z))
+  local_max_y_list <- vector("list", number_of_rows)
+  local_max_x_list <- vector("list", number_of_rows)
   
-  #Run through each row
-  for (j in 1:nrow(z)) {
+  for (j in 1:number_of_rows) {
     
-    #Extract jth row
-    intensity <- z[j,]
+    #Subset the ith row and convert to a vector by unlisting along with
+    #getting rid of the names associated with each element.
+    intensity <- unlist(data_matrix[j,], use.names = FALSE)
     
-    #Normalize it
-    intensity_norm <- intensity/max(intensity)
+    #Normalize intensity values by dividing by max intensity
+    normal_intensity <- intensity/max(intensity)
     
     #Create smooth spline based on values
-    smooth <- smooth.spline(wave, intensity_norm)
-    predicted <- predict(smooth, x = wave)
-    endpoints_y <- unlist(predicted$y, use.names = FALSE)
-     
-    #Solve for critical values where derivative equals to 0
-    newsmooth <- SmoothSplineAsPiecePoly(smooth)
-    xs <- solve(newsmooth, deriv = 1)
-    ys <- predict(newsmooth, xs)
+    smooth <- smooth.spline(dataset_wavelengths, normal_intensity)
+    predicted <- predict(smooth, x = endpoints_wavelength)
+    endpoints_intensity <- unlist(predicted$y, use.names = FALSE)
     
-    #Create 0 vector with length of xs vector
-    ext_val <- integer(length(xs))
+    #Solve for critical values where derivative equals to 0
+    piecePolySpline <- SmoothSplineAsPiecePoly(smooth)
+    critical_values <- solve(piecePolySpline, deriv = 1)
+    intensity_values_critical <- predict(piecePolySpline, critical_values)
+    
+    #Initialize vector with 0's with length of
+    #number of critical values
+    number_of_values <- length(critical_values)
+    local_max <- integer(number_of_values)
     
     #First derivative test 
-    for (i in 1:length(xs)) {
+    for (i in 1:number_of_values) {
       
       #If left side of critical value is increasing
-      if (predict(newsmooth,xs[i] - 1e-8, deriv = 1) > 0) {
+      if (predict(piecePolySpline, critical_values[i] - 1e-8, deriv = 1) > 0) {
         
         #If right side of critical value is decreasing
-        if (predict(newsmooth,xs[i] + 1e-8, deriv = 1) < 0) {
+        if (predict(piecePolySpline, critical_values[i] + 1e-8, deriv = 1) < 0) {
           
-          #Assign value 1
-          ext_val[i] <- 1
+          #Critical value is a local max
+          local_max[i] <- 1
+          
         }
       } 
     }
     
-    #Determine positions where value is 1
-    #Use this to determine local max coordinates
-    local_max_y <- ys[which(ext_val == 1)]
-    local_max_x <- xs[which(ext_val == 1)]
+    #Determine indexes where value is 1
+    local_max_y <- intensity_values_critical[which(local_max == 1)]
+    local_max_x <- critical_values[which(local_max == 1)]
     
-    #Determine absolute max value
-    if (max(local_max_y) > max(endpoints_y)) {
+    #Determine if max value corresponds to a critical value or not
+    if (max(local_max_y) > max(endpoints_intensity)) {
       
-      #If local extrema contains the absolute max
-      abs_y <- max(local_max_y)
-      abs_x <- local_max_x[which.max(local_max_y)]
-      
-    } else {
-      
-      #If either endpoints has absolute max
-      abs_y <- max(endpoints_y)
-      abs_x <- endpoints_x[which.max(endpoints_y)]
-      
-    }
-    
-    #Determine if the absolute max is inside the local extrema values
-    if (abs_y %in% local_max_y) {
-      
-      #If it is in the local_max_y, get rid of it along with its corresponding x-value
+      #If it is in 'local_max_y', omit it along with the x-coordinate
       local_max_x <- local_max_x[-which.max(local_max_y)]
       local_max_y <- local_max_y[-which.max(local_max_y)]
       
