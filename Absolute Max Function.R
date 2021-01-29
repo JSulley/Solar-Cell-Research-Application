@@ -1,72 +1,116 @@
-#Absolute Max Function
-abs_max_func <- function(x) {
+# About This Function:
+# For each coordinate, the function finds a smoothing spline
+# that describes the relationship between the given intensity values and
+# wavelengths. The absolute max point on this curve is then calculated.
+# The coordinate, peak wavelength, and absolute max intensity
+# are recorded, and the function goes to the next coordinate repeating
+# the same process.
+# The absolute max intensities are then normalized by dividing each value
+# by the largest absolute max intensity, and these values are placed next to the original 
+# values. 
+# The output is a dataframe with the following columns:
+# x-coordinate, y-coordinate, Peak Wavelength, Absolute Max Intensity, Normal Intensity
+# 
+# Note: 
+# Peak Wavelength is the wavelength that outputs the absolute max intensity
+
+################################################################################
+
+
+absolute_max_function <- function(dataframe) {
   
-  #Convert to matrix
-  x <- as.matrix(x)
+  # Convert 'dataframe' to matrix
+  data_matrix <- as.matrix(dataframe)
   
-  #Subset the wavelengths as a vector
-  dataset_wavelengths <- unlist(x[1,-(1:2)], use.names = FALSE)
-  x <- x[-1,]
+  # Subset the wavelengths from 'data_matrix'
+  # Wavelengths are located on the first row
+  # The first two entries in that row are NA so remove them
+  dataset_wavelengths <- unlist(data_matrix[1,-(1:2)], use.names = FALSE)
   
-  #Determine x values of endpoints
-  endpoints_x <- c(min(dataset_wavelengths), max(dataset_wavelengths))
+  # Remove the first row from 'data_matrix'
+  data_matrix <- data_matrix[-1,]
   
-  #Get the coordinates from the data set and omit the first two columns from data frame
-  x_coordinate <- unlist(x[,1], use.names = FALSE)
-  y_coordinate <- unlist(x[,2], use.names = FALSE)
-  x <- x[,-(1:2)]
+  # Create vector consisting of the smallest and largest wavelengths
+  min_wavelength <- min(dataset_wavelengths)
+  max_wavelength <- max(dataset_wavelengths)
+  wavelength_limits <- c(min_wavelength, max_wavelength)
   
-  #Make a list for the x,y coordinate and the wavelength
-  wavelength_list <- list()
+  # Subset the coordinates from 'data_matrix' 
+  # x-coordinates are in the first column; y-coordinates are in the second column
+  x_coordinates <- unlist(data_matrix[,1], use.names = FALSE)
+  y_coordinates <- unlist(data_matrix[,2], use.names = FALSE)
+  data_matrix <- data_matrix[,-(1:2)]
   
-  #Make for loop
-  #The number of rows will be the iterations needed to get the information we need.
-  for (i in 1:nrow(x)){
+  # Get the number of rows of 'data_matrix'
+  number_of_rows <- nrow(data_matrix)
+  
+  # Initialize matrix with all zeros
+  # Size: 'number_of_rows' by 5
+  # 5 columns: x-coordinate, y-coordinate, peak wavelength, intensity, normal intensity
+  # The number of entries = number_of_rows * 5
+  number_of_columns <- 5
+  entries <- rep(0, number_of_rows * number_of_columns)
+  
+  absolute_max_matrix <- matrix(entries, ncol = number_of_columns)
+  
+  # Make for loop from 1 to 'number_of_rows'
+  for (i in 1:number_of_rows) {
     
-    #Subset the ith row and convert to a vector by unlisting along with
-    #getting rid of the names associated with each element.
-    ith_row <- unlist(x[i,], use.names = FALSE)
+    # Subset the ith row of 'data_matrix' and convert to a vector
+    ith_row <- unlist(data_matrix[i,], use.names = FALSE)
     
-    #Make smooth spline with wavelengths on the horizontal axis and the corresponding intensities
-    #on the vertical axis
-    splinesmoothfit <- smooth.spline(x = dataset_wavelengths, y = ith_row)
-    predicted <- predict(splinesmoothfit, x = endpoints_x)
-    endpoints_y <- unlist(predicted$y, use.names = FALSE)
+    # Fit smooth curve with wavelengths (dataset_wavelengths) as x
+    # and intensities (ith_row) as y 
+    smoothSplineFit <- smooth.spline(x = dataset_wavelengths, y = ith_row)
     
-    #Solve for critical values where derivative equals to 0
-    newsmooth <- SmoothSplineAsPiecePoly(splinesmoothfit)
-    xs <- solve(newsmooth, deriv = 1)
-    ys <- predict(newsmooth, xs)
+    # Solve absolute max coordinate problem by first calculating the intensity at the
+    # lower/upper limits of the wavelengths (wavelength_limits) using the
+    # smooth curve (smoothSplineFit)
+    coordinate_list <- predict(smoothSplineFit, x = wavelength_limits)
     
-    #Determine where max value lies
-    if (max(ys) > max(endpoints_y)) {
+    # y-values in 'coordinate_list' are the predicted intensity values
+    intensity_values <- unlist(coordinate_list$y, use.names = FALSE)
+    
+    # Remove names from each element
+    intensity_values_endpoints <- unlist(intensity_values, use.names = FALSE)
+    
+    # Finish by first finding the critical values (where the derivative is 0)
+    piecePolySpline <- SmoothSplineAsPiecePoly(smoothSplineFit)
+    critical_values <- solve(piecePolySpline, deriv = 1)
+    
+    # Calculate intensity for each critical value
+    intensity_values_critical <- predict(piecePolySpline, critical_values)
+    
+    # Determine if max value corresponds to a critical value or not
+    if (max(intensity_values_critical) > max(intensity_values_endpoints)) {
       
-      #If local extrema contains the absolute max
-      abs_y <- max(ys)
-      abs_x <- xs[which.max(ys)]
+      # If local extrema contains the absolute max
+      absolute_max_intensity <- max(intensity_values_critical)
+      peak_wavelength <- critical_values[which.max(intensity_values_critical)]
       
     } else {
       
-      #If either endpoints has absolute max
-      abs_y <- max(endpoints_y)
-      abs_x <- endpoints_x[which.max(endpoints_y)]
+      # If either endpoint has absolute max
+      absolute_max_intensity <- max(intensity_values_endpoints)
+      peak_wavelength <- wavelength_limits[which.max(intensity_values_endpoints)]
       
     }
     
-    #Place row's coordinates and absolute max coordinates into dataframe
-    wavelength_list[[i]] <- data.frame(x_coordinate[i],y_coordinate[i], abs_x, abs_y)
+    absolute_max_matrix[i, 1:4] <- c(x_coordinates[i], y_coordinates[i], peak_wavelength, absolute_max_intensity)
     
   }
   
-  #Bind all the rows of the list together and make the object a data frame
-  wavelength_df <- as.data.frame(rbindlist(wavelength_list))
+  # Add normalized column by finding the max intensity and dividing
+  # every number in the "intensity" column by the max intensity.
+  max_intensity_value <- max(absolute_max_matrix[,4])
+  normalized_intensity <- absolute_max_matrix[,4]/max_intensity_value
   
-  #Add normalized column by finding the max intensity and dividing 
-  #every number in the "intensity" column by the max intensity.
-  normalized_int <- wavelength_df[,4]/max(wavelength_df[,4])
+  # Combine data frame with the normalized intensity values
+  absolute_max_matrix[,5] <- normalized_intensity
   
-  #Combine data frame with the normalized intensity values
-  wavelength_df <- cbind(wavelength_df, normalized_int)
+  # Make it into dataframe
+  absolute_max_dataframe <- as.data.frame(absolute_max_matrix)
   
-  wavelength_df
+  absolute_max_dataframe
+  
 }
