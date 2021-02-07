@@ -1994,40 +1994,96 @@ server <- function(input, output, session) {
     #Output information for interactive Heat map (normal max int.)
     output$info1 <- renderPrint({
         
-        #Display row information
-        nearPoints(df_info12()[,-c(3,4)], input$click, threshold = 15, maxpoints = 1)
+        dataframe <- nearPoints(df_info12()[,-c(3,4)], input$click, threshold = 15, maxpoints = 1)
+        number_of_rows <- nrow(dataframe)
+        
+        if (number_of_rows == 0) {
+            
+            print("Click on or near the center of a tile.")
+            
+        } else {
+            
+            #Display row information
+            dataframe
+            
+        }
         
     })
     
     #Output information for interactive heat map (peak wavelength)
     output$info2 <- renderPrint({
         
-        #Display row information
-        nearPoints(df_info12()[,-c(4,5)], input$click, threshold = 15, maxpoints = 1)
+        dataframe <- nearPoints(df_info12()[,-c(4,5)], input$click, threshold = 15, maxpoints = 1)
+        number_of_rows <- nrow(dataframe)
+        
+        if (number_of_rows == 0) {
+            
+            print("Click on or near the center of a tile.")
+            
+        } else {
+            
+            #Display row information
+            dataframe
+            
+        }
         
     })
     
     #Output information for interactive heat map (Relative Intensity)
     output$info3 <- renderPrint({
         
-        #Display row information
-        nearPoints(df_info345()[,-c(3,4,5)], input$click1, threshold = 15, maxpoints = 1)
+        dataframe <- nearPoints(df_info345()[,-c(3,4,5)], input$click1, threshold = 15, maxpoints = 1)
+        number_of_rows <- nrow(dataframe)
+        
+        if (number_of_rows == 0) {
+                
+            print("Click on or near the center of a tile.")
+                
+        } else {
+                
+            #Display row information
+            dataframe
+                
+        }
         
     })
     
     #Output Information for interactive heat map (Wavelength 1)
     output$info4 <- renderPrint({
         
-        #Display row information
-        nearPoints(df_info345()[,-c(3:5,7:9)], input$click2, threshold = 15, maxpoints = 1)
+        dataframe <- nearPoints(df_info345()[,-c(3:5,7:9)], input$click2, threshold = 15, maxpoints = 1)
+        number_of_rows <- nrow(dataframe)
+        
+        if (number_of_rows == 0) {
+            
+            print("Click on or near the center of a tile.")
+            
+        } else {
+            
+            #Display row information
+            dataframe
+            
+        }
+        
         
     })
     
     #Output Information for interactive heat map (Wavelength 2)
     output$info5 <- renderPrint({
         
-        #Display row information
-        nearPoints(df_info345()[,-c(3:6,8:9)], input$click3, threshold = 15, maxpoints = 1)
+        dataframe <- nearPoints(df_info345()[,-c(3:6,8:9)], input$click3, threshold = 15, maxpoints = 1)
+        number_of_rows <- nrow(dataframe)
+        
+        if (number_of_rows == 0) {
+            
+            print("Click on or near the center of a tile.")
+            
+        } else {
+            
+            #Display row information
+            dataframe
+            
+        }
         
     })
     
@@ -2035,7 +2091,11 @@ server <- function(input, output, session) {
     output$info6 <- renderPrint({
         
         #If no bin is clicked on
-        if (is.null(input$click4$x)) return()
+        if (is.null(input$click4$x)) {
+            
+            return(print("Click on any bin."))
+            
+        }
         
         #Create reactive value for current peak wavelength histogram
         z <- hist(dataset()[,3], breaks = binsPeakWave())
@@ -2145,7 +2205,11 @@ server <- function(input, output, session) {
     output$info7 <- renderPrint({
         
         #If no bin is clicked on
-        if (is.null(input$click5$x)) return()
+        if (is.null(input$click5$x)) {
+            
+           return(print("Click on any bin."))
+            
+        }
         
         #Create reactive value for current absolute max histogram
         z <- hist(dataset()[,5], breaks = binsAbsMax())
@@ -2257,9 +2321,20 @@ server <- function(input, output, session) {
         Wavelength <- local_max_points()[1,]
         Normal_Intensity <- local_max_points()[2,]
         
-        #Print local max/min points
-        brushedPoints(data.frame(Wavelength, Normal_Intensity), input$smoothPlot_brush,
-                      xvar = "Wavelength", yvar = "Normal_Intensity")
+        dataframe <- brushedPoints(data.frame(Wavelength, Normal_Intensity), input$smoothPlot_brush,
+                                   xvar = "Wavelength", yvar = "Normal_Intensity")
+        number_of_rows <- nrow(dataframe)
+        
+        if (number_of_rows == 0) {
+            
+            print("Brush over one or more green points to display local max coordinates.")
+            
+        } else {
+            
+            #Print local max/min points
+            dataframe
+            
+        }
         
     })
     
