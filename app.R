@@ -799,8 +799,21 @@ server <- function(input, output, session) {
     #Create table using relative_intensity_function (Relative Intensity Function.R) function
     bigger_data <- eventReactive(input$go, {
         
-        #Combine dataset() with dataframe created by relative_intensity_function (Relative Intensity Function.R) by column
-        cbind(dataset(), relative_intensity_function(first_df(),input$wavelength1,input$wavelength2))
+        if (is.na(input$wavelength1) | is.na(input$wavelength2)) {
+            
+            showModal(modalDialog(
+                title = "Error",
+                "Make sure each box has a value before pressing \"Go!\".",
+                easyClose = TRUE
+            ))
+            
+        } else {
+            
+            #Combine dataset() with dataframe created by relative_intensity_function (Relative Intensity Function.R) by column
+            cbind(dataset(), relative_intensity_function(first_df(),input$wavelength1,input$wavelength2))
+            
+        }
+        
         
     })
     
