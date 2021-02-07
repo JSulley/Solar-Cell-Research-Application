@@ -1088,8 +1088,17 @@ server <- function(input, output, session) {
     relIntPlot <- function() {
         
         #Make ggplot2 static plot
-        ggplot(df_relInt(), aes(X, Y, fill= Relative_Intensity)) + 
-            geom_tile() + theme_ipsum() + xlab("X") + ylab("Y") + labs(fill = "Rel. Intensity") + ggtitle(paste("Relative Intensity", paste0("(",input$wavelength1, "/", input$wavelength2,")"),"Plot"))+ scale_fill_gradient(low = "black", high = "red")
+        p <- ggplot(df_relInt(), aes(X, Y, fill= Relative_Intensity)) + 
+            geom_tile() + theme_ipsum() + xlab("X") + ylab("Y") + labs(fill = "Rel. Intensity") + scale_fill_gradient(low = "black", high = "red")
+        
+        p
+        
+        input$go
+        isolate({
+            
+            p + ggtitle(paste("Relative Intensity", paste0("(",input$wavelength1, "/", input$wavelength2,")"), "Plot"))
+            
+        }) 
         
     }
     
@@ -1097,17 +1106,34 @@ server <- function(input, output, session) {
     wave1IntPlot <- function() {
         
         #Make ggplot2 static plot
-        ggplot(df_wave1(), aes(X, Y, fill= Normal_Wave_1_Intensity)) + 
-            geom_tile() + theme_ipsum() + xlab("X") + ylab("Y") + labs(fill = "Normal Intensity") + ggtitle(paste("Wavelength 1",paste0("(",input$wavelength1,")"),"Intensity Plot")) + scale_fill_gradient(low = "black", high = "red")
+        p <- ggplot(df_wave1(), aes(X, Y, fill= Normal_Wave_1_Intensity)) + 
+            geom_tile() + theme_ipsum() + xlab("X") + ylab("Y") + labs(fill = "Normal Intensity") + scale_fill_gradient(low = "black", high = "red")
         
+        p
+        
+        input$go
+        isolate({
+            
+            p + ggtitle(paste("Wavelength 1",paste0("(",input$wavelength1,")"),"Intensity Plot")) 
+            
+        }) 
     }
     
     #Wavelength 2 Normal Intensity Heat Map
     wave2IntPlot <- function() {
         
         #Make ggplot2 static plot
-        ggplot(df_wave2(), aes(X, Y, fill= Normal_Wave_2_Intensity)) + 
-            geom_tile() + theme_ipsum() + xlab("X") + ylab("Y") + labs(fill = "Normal Intensity") + ggtitle(paste("Wavelength 2",paste0("(",input$wavelength2,")"),"Intensity Plot")) + scale_fill_gradient(low = "black", high = "red")
+        p <- ggplot(df_wave2(), aes(X, Y, fill= Normal_Wave_2_Intensity)) + 
+            geom_tile() + theme_ipsum() + xlab("X") + ylab("Y") + labs(fill = "Normal Intensity") + scale_fill_gradient(low = "black", high = "red")
+        
+        p
+        
+        input$go
+        isolate({
+            
+            p + ggtitle(paste("Wavelength 2",paste0("(",input$wavelength2,")"),"Intensity Plot"))  
+            
+        }) 
         
     }
     
@@ -1253,7 +1279,7 @@ server <- function(input, output, session) {
             title(main = input$textInp, xlab = input$textInp1, ylab = input$textInp2)
             axis(1, at = seq(input$lowerBound, input$upperBound, by = input$inc))
             
-            })
+        })
         
     })
     
@@ -1270,7 +1296,7 @@ server <- function(input, output, session) {
             title(main = input$textInp3, xlab = input$textInp4, ylab = input$textInp5)
             axis(1, at = seq(input$lowerBound1, input$upperBound1, by = input$inc1))
         
-            })
+        })
         
     })
     
