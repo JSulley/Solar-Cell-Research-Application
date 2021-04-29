@@ -17,56 +17,32 @@
 ################################################################################
 
 
-absolute_max_function <- function(dataframe) {
+absolute_max_function <- function(wavelengths, coordinates, ss_model_list) {
   
-  # Convert 'dataframe' to matrix
-  data_matrix <- as.matrix(dataframe)
-  
-  # Subset the wavelengths from 'data_matrix'
-  # Wavelengths are located on the first row
-  # The first two entries in that row are NA so remove them
-  dataset_wavelengths <- unlist(data_matrix[1,-(1:2)], use.names = FALSE)
-  
-  # Remove the first row from 'data_matrix'
-  data_matrix <- data_matrix[-1,]
-  
-  # Create vector consisting of the smallest and largest wavelengths
-  min_wavelength <- min(dataset_wavelengths)
-  max_wavelength <- max(dataset_wavelengths)
+  # Make vector consisting of endpoints
+  # Left endpoint: Minimum wavelength
+  # Right endpoint: Maximum wavelength
+  min_wavelength <- min(wavelengths)
+  max_wavelength <- max(wavelengths)
   wavelength_limits <- c(min_wavelength, max_wavelength)
   
-  # Subset the coordinates from 'data_matrix' 
-  # x-coordinates are in the first column; y-coordinates are in the second column
-  x_coordinates <- unlist(data_matrix[,1], use.names = FALSE)
-  y_coordinates <- unlist(data_matrix[,2], use.names = FALSE)
-  data_matrix <- data_matrix[,-(1:2)]
-  
-  # Get the number of rows of 'data_matrix'
-  number_of_rows <- nrow(data_matrix)
+  number_of_rows <- nrow(coordinates)
   
   # Initialize matrix with all zeros
   # Size: 'number_of_rows' by 5
-  # 5 columns: x-coordinate, y-coordinate, peak wavelength, intensity, normal intensity
+  # 5 columns: x-coordinate, y-coordinate, peak wavelength, absolute max intensity, normal intensity
   # The number of entries = number_of_rows * 5
   number_of_columns <- 5
   entries <- rep(0, number_of_rows * number_of_columns)
   
   absolute_max_matrix <- matrix(entries, ncol = number_of_columns)
   
-  # Make for loop from 1 to 'number_of_rows'
   for (i in 1:number_of_rows) {
-    
-    # Subset the ith row of 'data_matrix' and convert to a vector
-    ith_row <- unlist(data_matrix[i,], use.names = FALSE)
-    
-    # Fit smooth curve with wavelengths (dataset_wavelengths) as x
-    # and intensities (ith_row) as y 
-    smoothSplineFit <- smooth.spline(x = dataset_wavelengths, y = ith_row)
     
     # Solve absolute max coordinate problem by first calculating the intensity at the
     # lower/upper limits of the wavelengths (wavelength_limits) using the
-    # smooth curve (smoothSplineFit)
-    coordinate_list <- predict(smoothSplineFit, x = wavelength_limits)
+    # ith row's smooth curve from 'ss_model_list'.  
+    coordinate_list <- predict(ss_model_list[[i]], x = wavelength_limits)
     
     # y-values in 'coordinate_list' are the predicted intensity values
     intensity_values <- unlist(coordinate_list$y, use.names = FALSE)
@@ -74,41 +50,41 @@ absolute_max_function <- function(dataframe) {
     # Remove names from each element
     intensity_values_endpoints <- unlist(intensity_values, use.names = FALSE)
     
-    # Finish by first finding the critical values (where the derivative is 0)
-    piecePolySpline <- SmoothSplineAsPiecePoly(smoothSplineFit)
+    # Find critical values where first derivative is 0
+    piecePolySpline <- SmoothSplineAsPiecePoly(ss_model_list[[i]])
     critical_values <- solve(piecePolySpline, deriv = 1)
     
-    # Calculate intensity for each critical value
+    # Calculate intensity at each critical value
     intensity_values_critical <- predict(piecePolySpline, critical_values)
     
-    # Determine if max value corresponds to a critical value or not
+    # Determine if max intensity value corresponds to a critical value or endpoint
     if (max(intensity_values_critical) > max(intensity_values_endpoints)) {
       
-      # If local extrema contains the absolute max
+      # Local extrema contain the absolute max
       absolute_max_intensity <- max(intensity_values_critical)
       peak_wavelength <- critical_values[which.max(intensity_values_critical)]
       
     } else {
       
-      # If either endpoint has absolute max
+      # Endpoints contain the absolute max
       absolute_max_intensity <- max(intensity_values_endpoints)
       peak_wavelength <- wavelength_limits[which.max(intensity_values_endpoints)]
       
     }
     
-    absolute_max_matrix[i, 1:4] <- c(x_coordinates[i], y_coordinates[i], peak_wavelength, absolute_max_intensity)
+    # Record values
+    absolute_max_matrix[i, 1:4] <- c(coordinates[i,1], coordinates[i,2], peak_wavelength, absolute_max_intensity)
     
   }
   
-  # Add normalized column by finding the max intensity and dividing
-  # every number in the "intensity" column by the max intensity.
+  # Find normalized column by determining the max absolute intensity value and dividing
+  # every number in the "intensity" column by this value.
   max_intensity_value <- max(absolute_max_matrix[,4])
   normalized_intensity <- absolute_max_matrix[,4]/max_intensity_value
   
-  # Combine data frame with the normalized intensity values
+  # 5th column of matrix is normalized max intensities
   absolute_max_matrix[,5] <- normalized_intensity
   
-  # Make it into dataframe
   absolute_max_dataframe <- as.data.frame(absolute_max_matrix)
   
   absolute_max_dataframe
