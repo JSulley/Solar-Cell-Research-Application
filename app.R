@@ -83,7 +83,7 @@ body <- dashboardBody(
                                         tags$li("The first row is the wavelengths."),
                                         tags$li("The first two columns are the x and y coordinates."),
                                         tags$li("The rest are the intensities."),
-                                        ),
+                                    ),
                                     strong("Example:"),
                                     br(),
                                     
@@ -175,7 +175,7 @@ body <- dashboardBody(
                                       based on which histogram(s) is selected."),
                                     img(src = "Absolute and Local Max Hist.PNG", height = 520, width = 900),
                                     hr(),
-                           
+                                    
                                     # Histogram main and axes title
                                     h3("Histogram Plot Controls"),
                                     p("The controls of the histograms have expanded causing the plot settings to be
@@ -218,8 +218,9 @@ body <- dashboardBody(
                                       If the cursor is not close enough to a line, a message will be shown asking you
                                       to bring the cursor closer to it."),
                                     img(src = "Multiple Smooth Splines.png", height = 520, width = 950)
+                           
                                     )
-                                
+                           
                     )   
                     
                 )
@@ -249,34 +250,36 @@ body <- dashboardBody(
                     withSpinner(getOption("spinner.type", 8)),
                 verbatimTextOutput("info2"),
                 
-                fluidRow(column(3,
+                fluidRow(
+                    
+                    column(3,
                                 
                                 uiOutput("scaleLow")
-                                
-                                ),
-                         
-                         column(3,
-                                
-                                uiOutput("scaleUp")
-                                
-                                ),
-                         
-                         column(1,
-                                
-                                actionBttn("applyLimits", "Enter", color = "primary")
-                                
-                                ),
-                         
-                         column(1,
-                                
-                                actionBttn("reset", "Reset", color = "primary")
-                                
-                                ))),
+                           ),
+                
+                    column(3,
+                           
+                           uiOutput("scaleUp")
+                           
+                    ),
+                    
+                    column(1,
+                           
+                           actionBttn("applyLimits", "Enter", color = "primary")
+                           
+                    ),
+                    
+                    column(1,
+                           
+                           actionBttn("reset", "Reset", color = "primary")
+                           
+                           ))),
         
         # Content for Relative/Wavelength Intensity Plots
         tabItem(tabName = "relativeDash",
                 
                 fluidRow(
+                    
                     column(4,
                            
                            # Make two boxes that accept numeric entries for two wavelength values
@@ -294,9 +297,10 @@ body <- dashboardBody(
                            # Create Action button for user
                            actionBttn("go","Go!", color = "primary")
                            
-                           )
+                    )
                     
                 ),
+                
                 # Make fluid row for interactive relative intensity map 
                 fluidRow(
                     
@@ -316,7 +320,7 @@ body <- dashboardBody(
                                withSpinner(getOption("spinner.type", 8)),
                            verbatimTextOutput("info3")
                            
-                        ),
+                    ),
                     
                     
                     # Make fluid row for interactive intensities for both inputted wavelengths
@@ -366,7 +370,7 @@ body <- dashboardBody(
                            # Output table regarding the given data set
                            tableOutput('table')
                            
-                           ),
+                    ),
                     
                     # Table consisting columns for the output values for given wavelength values
                     column(6,
@@ -380,7 +384,7 @@ body <- dashboardBody(
                            # Output table regarding inputted wavelengths
                            tableOutput('table1')
                            
-                           ),
+                    )
                 )
         ),
         
@@ -395,14 +399,14 @@ body <- dashboardBody(
                            numericInput("numberOfBins", "Numeric Input: Number of Bins (Blue Histograms)",
                                         value = 2, min = 1),
                            
-                           ),
+                    ),
                     
                     column(1,
                            
                            # Enter button
                            actionBttn("go2", "Enter", color = "primary")
                            
-                           ),
+                    ),
                     
                     column(3,
                            
@@ -410,7 +414,7 @@ body <- dashboardBody(
                            numericInput("numberOfBins1", "Numeric Input: Number of Bins 
                                         (Green Histograms)", value = 2, min = 1),
                            
-                           ),
+                    ),
                     
                     column(1,
                            
@@ -500,13 +504,13 @@ body <- dashboardBody(
                                      column(1,
                                             
                                             uiOutput("lower")
-                                    
+                                            
                                      ),
-                                    
-                                     column(1,
                                      
+                                     column(1,
+                                            
                                             uiOutput("upper")
-                                                   
+                                            
                                      ),
                                      
                                      column(1,
@@ -519,7 +523,7 @@ body <- dashboardBody(
                                             
                                             actionBttn("reset1", "Reset", color = "primary")
                                             
-                                    ))),
+                                     ))),
                 
                 # Download button for histogram
                 downloadBttn("downloadHist","Download Histogram Plot", color = "primary"),
@@ -632,7 +636,7 @@ body <- dashboardBody(
                                             
                                      ))
                                  
-                                 ),
+                ),
                 
                 # Download button for Absolute/local max histogram
                 downloadBttn("downloadHist1","Download Histogram Plot", color = "primary"),
@@ -659,7 +663,7 @@ body <- dashboardBody(
                 fluidRow(
                     
                     column(4,
-                            
+                           
                            # Make numeric entry for row number to view smoothing spline interpolation graph with scatterplot
                            h4("Smooth Spline Interpolation Display Input", align = "left"),
                            numericInput('rowIndex', "Enter row number" , value = NULL, min = 0),
@@ -667,8 +671,8 @@ body <- dashboardBody(
                            # Create action button for it
                            actionBttn("go1", "Go!", color = "primary"),
                            hr()
-                    
-                        )),
+                           
+                    )),
                 
                 fluidRow(
                     
@@ -676,13 +680,14 @@ body <- dashboardBody(
                            
                            # Download button for smoothing spline plot
                            downloadBttn("downloadSpectrum", "Download Spectrum Plot", color = "primary")),
+                    
+                    column(3,
                            
-                    column(3,       
                            # Switch between Path 1 & 2 Normalization of
                            # smoothing spline model.
                            radioGroupButtons("pathChoice1", label = "Normalization Method", choices = c("Path 1", "Path 2"), status = "primary")
                            
-                           )),
+                    )),
                 
                 # Output smoothing spline plot
                 plotOutput("smoothLine", 
@@ -740,7 +745,7 @@ server <- function(input, output, session) {
         df <- read_delim(input$file$datapath, delim = input$sep, col_names = FALSE)
         
         as.matrix(df)
-
+        
     })
     
     ###DECOMPOSE DATASET###
@@ -766,7 +771,7 @@ server <- function(input, output, session) {
         first_df()[-1,-(1:2)]
         
     })
-
+    
     ###SMOOTHING SPLINE MODEL LIST###
     
     smoothing_spline_list <- eventReactive(input$file$datapath, {
@@ -854,14 +859,14 @@ server <- function(input, output, session) {
     binsPeakWave <- reactive({
         
         seq(min(dataset()[,3]),max(dataset()[,3]), length.out = input$inslider + 1)
-    
+        
     })
     
     # Calculate break points based on lowest & highest local peak wavelength values along with number of bins
     binsLocWave <- reactive({
         
         seq(min(localPeakWave()),max(localPeakWave()), length.out = input$inslider1 + 1)
-    
+        
     })
     
     # Create local max vector 
@@ -879,14 +884,14 @@ server <- function(input, output, session) {
         p <- p/absolute_max_intensity
         
         p
-    
+        
     })
     
     # Calculate break points
     binsAbsMax <- reactive({
         
         seq(min(dataset()[,5]),max(dataset()[,5]), length.out = input$inslider2 + 1)
-    
+        
     })
     
     # Calculate break points
@@ -1055,37 +1060,6 @@ server <- function(input, output, session) {
         # Lowest number is 1; highest number is how many coordinates there are in the uploaded dataset
         # Default value is 2
         sliderInput("inslider1", "Local Peak Wavelength (Green)", min = 1, max = length(unlist(local_max_list()[1:(length(local_max_list())/2)], use.names = FALSE)), value = isolate(input$numberOfBins1), step = 1)
-        
-    })
-    
-    # Slider for horizontal range of Absolute/Local Max Histogram
-    output$sliderx1 <- renderUI({
-        
-        # Calculate min and max values for each histogram. Then use the floor function on the minimums and ceiling function on maximums for integers
-        min_both <- floor(min(c(dataset()[,5], localMax())))
-        max_both <- ceiling(max(c(dataset()[,5],localMax())))
-        min_abs <- floor(min(dataset()[,5]))
-        max_abs <- ceiling(max(dataset()[,5]))
-        min_local <- floor(min(localMax()))
-        max_local <- ceiling(max(localMax()))
-        
-        # If user checks both boxes, then display both histograms
-        if (input$absmaxcheck & input$localmaxcheck) {
-            
-            # Create slider based on both histograms
-            sliderInput("insliderx1", "Horizontal Axis Range", min = min_both, max = max_both, value = c(min_both,max_both), step = (max_both - min_both)/(max(length(dataset()[,5]), length(localMax()))-1))
-            
-        } else if (input$absmaxcheck) {
-            
-            # Create slider based on the absolute max histogram 
-            sliderInput("insliderx1", "Horizontal Axis Range", min = min_abs, max = max_abs, value = c(min_abs, max_abs), step = (max_abs - min_abs)/(length(dataset()[,5])-1))
-            
-        } else if (input$localmaxcheck) {
-            
-            # Create slider based on the local peak wavelength histogram
-            sliderInput("insliderx1", "Horizontal Axis Range", min = min_local, max = max_local, value = c(min_local, max_local), step = (max_local - min_local)/(length(localMax())-1))
-            
-        }
         
     })
     
@@ -1267,7 +1241,7 @@ server <- function(input, output, session) {
     
     # Peak Wavelength Heat Map
     peakWavePlot <- function() {
-
+        
         # Convert gradient_limit list objects to vectors
         lower_gradient_limit <- unlist(gradient_limits$lower_limit, use.names = FALSE)
         upper_gradient_limit <- unlist(gradient_limits$upper_limit, use.names = FALSE)
@@ -1483,8 +1457,8 @@ server <- function(input, output, session) {
     }
     
     # Reactive values for Absolute and Local Max Histogram
-    histogram_titles_and_values1 <- reactiveValues(lower_limit = NULL, upper_limit = NULL, increment = NULL, 
-                                                  main_title = NULL, xlabel = NULL, ylabel = NULL)
+    histogram_titles_and_values1 <- reactiveValues(lower_limit = NULL, upper_limit = NULL, increment = NULL,
+                                                   main_title = NULL, xlabel = NULL, ylabel = NULL)
     
     observeEvent(input$applyChange1, {
         
@@ -1624,7 +1598,6 @@ server <- function(input, output, session) {
         for (k in 1:list_length) {
             
             lines(selected_path_list()[[k]], col = "red", lwd = 2)
-        
             
         }
         
@@ -1646,7 +1619,7 @@ server <- function(input, output, session) {
     
     # Path 2 Normalization Smooth Spline
     smoothSplPlot2 <- function() {
-            
+        
         # Plot points for given row on graph
         plot(dataset_wavelengths(), y_values2(), xlab = "Wavelength", ylab = "Normal Intensity", main = paste("Normal Intensity vs. Wavelength \n X =", coordinates()[1],", Y = ", coordinates()[2]))
         
@@ -1659,7 +1632,7 @@ server <- function(input, output, session) {
     }
     
     ###SMOOTH SPLINE INTERPOLATION GRAPHS###
-
+    
     # Tool tip
     output$tooltip <- renderUI({
         
@@ -1764,7 +1737,7 @@ server <- function(input, output, session) {
         }
         
     })
-
+    
     
     ###REACTIVE VALUES FOR DOWNLOAD BUTTONS###
     
@@ -1944,7 +1917,7 @@ server <- function(input, output, session) {
         
         # Content for file
         content = function(file){
-           
+            
             # SVG is selected
             if (input$select == 1) {
                 
@@ -2379,14 +2352,14 @@ server <- function(input, output, session) {
         number_of_rows <- nrow(dataframe)
         
         if (number_of_rows == 0) {
-                
+            
             print("Click on or near the center of a tile.")
-                
+            
         } else {
-                
+            
             # Display row information
             dataframe
-                
+            
         }
         
     })
@@ -2554,7 +2527,7 @@ server <- function(input, output, session) {
         # If no bin is clicked on
         if (is.null(input$click5$x)) {
             
-           return(print("Click on any bin."))
+            return(print("Click on any bin."))
             
         }
         
@@ -2712,7 +2685,7 @@ server <- function(input, output, session) {
                 
             }
         }
-            
+        
         
         
     })
