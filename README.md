@@ -24,7 +24,7 @@
 <hr>
 
 <h2 id="access">Accessing The Application</h2>
-<a href="https://sulley.shinyapps.io/Solar_Cell_Research_App/?_ga=2.34748321.1013140324.1636509877-133858401.1636509877" target="_blank">Click here to access the Solar Cell Research Application</a>
+<a href="https://sulley.shinyapps.io/Solar_Cell_Research_App/?_ga=2.51264047.727473287.1661166049-133858401.1636509877" target="_blank">Click here to access the Solar Cell Research Application</a>
 <br />
 <br />
 <p>The program expects a cathodoluminescence dataset, either in TSV or CSV format, that is structured a certain way to be uploaded (refer to the “Welcome” page in the tab “File Format for Upload” for more information). When the application loads up to the “Welcome” page, for example, select “Comma” for the separator which is underneath the file upload widget. Then, download and upload the dataset <a href="./Example-Datasets/Allspectra S-8 20K CSV Format.csv">Allspectra S-8 20K CSV Format</a> to the program.</p>
