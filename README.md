@@ -16,7 +16,7 @@
         <li><a href="#spline-demo">Visualizing Luminescence vs. Wavelength of All Coordinates in One Plot</a></li>
     </ol>
     <li><a href="#packages">Packages Used</a></li>
-    <li><a href="#publication">Publication</a></li>
+    <li><a href="#publication">Publications</a></li>
 </ol>
 <hr>
 <h2 id="overview">Overview</h2>
@@ -154,6 +154,8 @@ https://user-images.githubusercontent.com/66404238/145751187-5ca3616e-7e3e-46a8-
 </table>
 <hr>
 
-<h2 id="publication">Publication</h2>
+<h2 id="publication">Publications</h2>
 <p>A previous version of the application was presented at the 2020 International Conference of Advanced Research in Applied Science, Engineering and Technology (ICARASET '20). The following is the article published:</p>
 <p><a href="http://ibii-us.org/Journals/JESD/V4N1/Publish/N4V1_3.pdf">Analyze and visualize cathodoluminescence data obtained from images of a photovoltaic cell using the R language</a></p>
+<p>Another research paper was published back in October 2022 mentioning the app:</p>
+<p><a href="https://pubs.acs.org/doi/10.1021/acsomega.2c05640">Quantitative Cathodoluminescence Mapping: A CdMgSeTe Thin-Film Case Study</a></p>
